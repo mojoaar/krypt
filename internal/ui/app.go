@@ -727,16 +727,7 @@ func (a App) viewBanner() string {
 	for _, line := range art {
 		rows = append(rows, pad+TitleStyle.Render(line))
 	}
-	if a.version != "dev" {
-		ver := HelpDescStyle.Render(a.version)
-		verPad := a.width - lipgloss.Width(ver) - 1
-		if verPad < 0 {
-			verPad = 0
-		}
-		rows = append(rows, strings.Repeat(" ", verPad)+ver)
-	} else {
-		rows = append(rows, "")
-	}
+	rows = append(rows, "")
 	return strings.Join(rows, "\n")
 }
 

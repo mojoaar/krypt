@@ -713,7 +713,7 @@ func (a App) viewBanner() string {
 		rows = append(rows, pad+TitleStyle.Render(line))
 	}
 	if a.version != "dev" {
-		ver := HelpDescStyle.Render(fmt.Sprintf("v%s", a.version))
+		ver := HelpDescStyle.Render(a.version)
 		verPad := a.width - lipgloss.Width(ver) - 1
 		if verPad < 0 {
 			verPad = 0

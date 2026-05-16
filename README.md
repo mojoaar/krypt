@@ -42,6 +42,7 @@ Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss
 - **Brute force protection** — max 5 failed unlock attempts; vault destroyed on limit; attempt counter is HMAC-signed to prevent tampering
 - **Optional 2FA unlock** — add a TOTP second factor (any authenticator app) to the unlock screen; set up entirely within the TUI
 - **Password generator** — generate a strong 30-character password from the main screen (`g`) or inline in the form (`ctrl+g`); copies to clipboard instantly
+- **Export vault** — export all entries as plaintext or AES-256-GCM encrypted JSON (`X`); choose output path; encrypted export requires a one-time passphrase
 - **Tag support** — tag entries and filter/search by tag
 - **Copy to clipboard** — context-aware copy keybindings per entry type
 - **Clickable hyperlinks** — Login URLs rendered as terminal hyperlinks (iTerm2, WezTerm, kitty, Ghostty)
@@ -209,6 +210,7 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 | `g` | generate strong password and copy to clipboard |
 | `t` | 2FA setup / disable |
 | `s` | sync to GitHub Gist |
+| `X` | export vault (plaintext or encrypted JSON) |
 | `?` | toggle help overlay (scrollable) |
 | `q` / `ctrl+c` | quit |
 
@@ -217,6 +219,36 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 |-----|--------|
 | `ctrl+r` | reset vault (danger zone — type `delete` to confirm) |
 | `ctrl+c` | quit |
+
+---
+
+## Export vault
+
+Press `X` on the main screen to open the export wizard.
+
+**Step 1 — Format**
+
+| Key | Format |
+|-----|--------|
+| `p` | Plaintext JSON — human-readable, no password required |
+| `e` | Encrypted JSON — AES-256-GCM, requires a one-time passphrase |
+
+> ⚠ Plaintext export contains unencrypted secrets. Store the file securely and delete it when done.
+
+**Step 2 — Output path**
+
+The default path is `~/krypt-export-YYYY-MM-DD.json` (or `.enc.json` for encrypted).
+Edit the path freely; `~` is expanded automatically.
+
+**Step 3 — Passphrase** *(encrypted only)*
+
+Enter and confirm a one-time passphrase. The file is encrypted with Argon2id + AES-256-GCM — the same algorithm used for the vault itself.
+
+**Step 4 — Confirm**
+
+Review the format and path, then press `enter` to write the file.
+
+The export file is written with `0600` permissions (owner read/write only).
 
 ---
 
@@ -260,6 +292,20 @@ make build
 ---
 
 ## Changelog
+
+### v1.3.0
+
+**Export vault**
+- Press `X` on the main screen to open the export wizard
+- Choose plaintext JSON or AES-256-GCM encrypted JSON
+- Edit the output path (default `~/krypt-export-YYYY-MM-DD.json`)
+- Encrypted export uses Argon2id + AES-256-GCM with a one-time passphrase
+- Export files written with `0600` permissions
+
+**UX polish**
+- Search bar background is now uniform — text input background matches the bar colour
+
+---
 
 ### v1.2.0
 

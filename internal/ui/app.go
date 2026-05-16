@@ -28,6 +28,7 @@ const (
 	modeHelp                   // help overlay
 	modeSync                   // sync in progress
 	mode2FA                    // 2FA setup / disable
+	modeExport                 // export overlay
 )
 
 type focusTarget int
@@ -64,6 +65,7 @@ type App struct {
 	detail     DetailView
 	form       Form
 	confirm    Confirm
+	export     ExportModel
 	search     textinput.Model
 	helpVP     viewport.Model
 	twoFA      TwoFAModel
@@ -94,6 +96,10 @@ func NewApp(version string) App {
 	si := textinput.New()
 	si.Placeholder = "search…"
 	si.CharLimit = 128
+	si.TextStyle = lipgloss.NewStyle().Background(colorSelected).Foreground(colorText)
+	si.PlaceholderStyle = lipgloss.NewStyle().Background(colorSelected).Foreground(colorMuted)
+	si.PromptStyle = lipgloss.NewStyle().Background(colorSelected).Foreground(colorAccent)
+	si.Cursor.Style = lipgloss.NewStyle().Background(colorAccent).Foreground(colorSelected)
 
 	syncCfg, _ := data.LoadConfig()
 	if syncCfg == nil {
@@ -109,6 +115,7 @@ func NewApp(version string) App {
 		detail:  dv,
 		form:    NewForm(),
 		confirm: NewConfirm(),
+		export:  NewExportModel(),
 		search:  si,
 		syncCfg: syncCfg,
 		focus:   focusList,
@@ -144,6 +151,7 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		a.detail.SetSize(listW, listH)
 		a.form.SetSize(a.width, a.height)
 		a.confirm.SetSize(a.width, a.height)
+		a.export.SetSize(a.width, a.height)
 		a.unlock.width = a.width
 		a.unlock.height = a.height
 		// Resize help viewport if it's open
@@ -228,6 +236,28 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			a.setStatus("2FA disabled — vault opens with master password only", false)
 		}
 		return a, clearStatusAfter(5 * time.Second)
+
+	// ── Export events ────────────────────────────────────────────────────────
+	case exportWriteMsg:
+		entries := []data.Entry{}
+		if a.store != nil {
+			entries = a.store.Entries()
+		}
+		return a, DoExport(msg, entries)
+
+	case ExportDoneMsg:
+		a.mode = modeNav
+		a.setStatus("exported to "+msg.Path, false)
+		return a, clearStatusAfter(5 * time.Second)
+
+	case exportErrorMsg:
+		a.mode = modeNav
+		a.setStatus("export failed: "+string(msg), true)
+		return a, clearStatusAfter(5 * time.Second)
+
+	case ExportCancelMsg:
+		a.mode = modeNav
+		return a, nil
 	}
 
 	// ── Per-mode routing ─────────────────────────────────────────────────────
@@ -240,6 +270,8 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return a.updateConfirm(msg)
 	case mode2FA:
 		return a.update2FA(msg)
+	case modeExport:
+		return a.updateExport(msg)
 	case modeNav:
 		return a.updateNav(msg)
 	case modeDetail:
@@ -336,6 +368,12 @@ func (a App) updateConfirm(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (a App) update2FA(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	a.twoFA, cmd = a.twoFA.Update(msg)
+	return a, cmd
+}
+
+func (a App) updateExport(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	a.export, cmd = a.export.Update(msg)
 	return a, cmd
 }
 
@@ -446,6 +484,10 @@ func (a App) updateNav(msg tea.Msg) (tea.Model, tea.Cmd) {
 				a.setStatus("strong password generated and copied", false)
 			}
 			return a, clearStatusAfter(5 * time.Second)
+		case "X":
+			a.export.Open()
+			a.mode = modeExport
+			return a, nil
 		}
 	}
 	return a, nil
@@ -661,6 +703,8 @@ func (a App) View() string {
 		return a.viewHelp()
 	case mode2FA:
 		return a.twoFA.View()
+	case modeExport:
+		return a.export.View()
 	}
 	return a.viewMain()
 }
@@ -758,6 +802,7 @@ func (a App) viewHelpBar() string {
 			{"s", "sync"},
 			{"t", "2FA setup"},
 			{"g", "generate pw"},
+			{"X", "export"},
 		}
 	case modeDetail:
 		hints = []hint{
@@ -869,6 +914,7 @@ func (a App) buildHelpContent(w int) string {
 		}},
 		{"App", [][2]string{
 			{"s", "sync vault to GitHub Gist"},
+			{"X", "export vault (plaintext or encrypted JSON)"},
 			{"?", "toggle this help"},
 			{"q  or  ctrl+c", "quit"},
 		}},

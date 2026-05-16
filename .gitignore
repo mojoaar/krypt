@@ -1,0 +1,4 @@
+dist/
+krypt
+*.enc
+.DS_Store

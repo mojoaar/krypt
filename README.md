@@ -252,6 +252,14 @@ make build
 
 ## Changelog
 
+### v1.1.0
+
+**Security / UX**
+- Vault reset from the unlock screen — press `ctrl+r`, type `delete` to confirm; permanently removes vault and all krypt config files so you can start fresh
+- Unlock screen hint bar updated to show `ctrl+r  reset vault`
+
+---
+
 ### v1.0.0
 
 Initial release.

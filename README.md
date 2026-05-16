@@ -42,6 +42,7 @@ Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss
 - **Brute force protection** — max 5 failed unlock attempts; vault destroyed on limit; attempt counter is HMAC-signed to prevent tampering
 - **Optional 2FA unlock** — add a TOTP second factor (any authenticator app) to the unlock screen; set up entirely within the TUI
 - **Password generator** — generate a strong 30-character password from the main screen (`g`) or inline in the form (`ctrl+g`); copies to clipboard instantly
+- **Actions menu** — press `m` to open a compact overlay with quick access to generate password, 2FA setup, and export
 - **Export vault** — export all entries as plaintext or AES-256-GCM encrypted JSON (`X`); choose output path; encrypted export requires a one-time passphrase
 - **Tag support** — tag entries and filter/search by tag
 - **Copy to clipboard** — context-aware copy keybindings per entry type
@@ -207,12 +208,15 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 ### App
 | Key | Action |
 |-----|--------|
+| `m` | open actions menu (generate pw · 2FA · export) |
 | `g` | generate strong password and copy to clipboard |
 | `t` | 2FA setup / disable |
 | `s` | sync to GitHub Gist |
 | `X` | export vault (plaintext or encrypted JSON) |
 | `?` | toggle help overlay (scrollable) |
 | `q` / `ctrl+c` | quit |
+
+> `g`, `t`, and `X` work both directly and from inside the `m` actions menu.
 
 ### Unlock screen
 | Key | Action |
@@ -301,6 +305,11 @@ make build
 - Edit the output path (default `~/krypt-export-YYYY-MM-DD.json`)
 - Encrypted export uses Argon2id + AES-256-GCM with a one-time passphrase
 - Export files written with `0600` permissions
+
+**Actions menu**
+- Press `m` to open a compact overlay with `g` generate password · `t` 2FA setup · `X` export vault
+- Direct keys still work from the nav screen for power users
+- Bottom hint bar cleaned up — three items replaced with single `m menu` hint
 
 **UX polish**
 - Search bar background is now uniform — text input background matches the bar colour

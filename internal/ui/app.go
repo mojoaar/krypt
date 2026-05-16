@@ -400,7 +400,7 @@ func (a App) updateMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case "t":
 		a.mode = modeNav
 		return a.open2FASetup()
-	case "X":
+	case "x":
 		a.mode = modeNav
 		a.export.Open()
 		a.mode = modeExport
@@ -515,7 +515,7 @@ func (a App) updateNav(msg tea.Msg) (tea.Model, tea.Cmd) {
 				a.setStatus("strong password generated and copied", false)
 			}
 			return a, clearStatusAfter(5 * time.Second)
-		case "X":
+		case "x":
 			a.export.Open()
 			a.mode = modeExport
 			return a, nil
@@ -784,7 +784,7 @@ func (a App) viewMenu() string {
 	items := []item{
 		{"g", "generate password"},
 		{"t", "2FA setup / disable"},
-		{"X", "export vault"},
+		{"x", "export vault"},
 	}
 
 	title := lipgloss.NewStyle().Foreground(colorAccent).Bold(true).Render("⚡ Actions")
@@ -980,7 +980,7 @@ func (a App) buildHelpContent(w int) string {
 			{"m", "open actions menu (generate pw, 2FA, export)"},
 			{"g", "generate password and copy to clipboard"},
 			{"t", "2FA setup / disable"},
-			{"X", "export vault (plaintext or encrypted JSON)"},
+			{"x", "export vault (plaintext or encrypted JSON)"},
 			{"s", "sync vault to GitHub Gist"},
 			{"?", "toggle this help"},
 			{"q  or  ctrl+c", "quit"},

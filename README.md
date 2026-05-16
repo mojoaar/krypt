@@ -43,7 +43,7 @@ Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss
 - **Optional 2FA unlock** — add a TOTP second factor (any authenticator app) to the unlock screen; set up entirely within the TUI
 - **Password generator** — generate a strong 30-character password from the main screen (`g`) or inline in the form (`ctrl+g`); copies to clipboard instantly
 - **Actions menu** — press `m` to open a compact overlay with quick access to generate password, 2FA setup, and export
-- **Export vault** — export all entries as plaintext or AES-256-GCM encrypted JSON (`X`); choose output path; encrypted export requires a one-time passphrase
+- **Export vault** — export all entries as plaintext or AES-256-GCM encrypted JSON (`x`); choose output path; encrypted export requires a one-time passphrase
 - **Tag support** — tag entries and filter/search by tag
 - **Copy to clipboard** — context-aware copy keybindings per entry type
 - **Clickable hyperlinks** — Login URLs rendered as terminal hyperlinks (iTerm2, WezTerm, kitty, Ghostty)
@@ -212,11 +212,11 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 | `g` | generate strong password and copy to clipboard |
 | `t` | 2FA setup / disable |
 | `s` | sync to GitHub Gist |
-| `X` | export vault (plaintext or encrypted JSON) |
+| `x` | export vault (plaintext or encrypted JSON) |
 | `?` | toggle help overlay (scrollable) |
 | `q` / `ctrl+c` | quit |
 
-> `g`, `t`, and `X` work both directly and from inside the `m` actions menu.
+> `g`, `t`, and `x` work both directly and from inside the `m` actions menu.
 
 ### Unlock screen
 | Key | Action |
@@ -228,7 +228,7 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 
 ## Export vault
 
-Press `X` on the main screen to open the export wizard.
+Press `x` on the main screen to open the export wizard.
 
 **Step 1 — Format**
 
@@ -300,14 +300,14 @@ make build
 ### v1.3.0
 
 **Export vault**
-- Press `X` on the main screen to open the export wizard
+- Press `x` on the main screen to open the export wizard
 - Choose plaintext JSON or AES-256-GCM encrypted JSON
 - Edit the output path (default `~/krypt-export-YYYY-MM-DD.json`)
 - Encrypted export uses Argon2id + AES-256-GCM with a one-time passphrase
 - Export files written with `0600` permissions
 
 **Actions menu**
-- Press `m` to open a compact overlay with `g` generate password · `t` 2FA setup · `X` export vault
+- Press `m` to open a compact overlay with `g` generate password · `t` 2FA setup · `x` export vault
 - Direct keys still work from the nav screen for power users
 - Bottom hint bar cleaned up — three items replaced with single `m menu` hint
 

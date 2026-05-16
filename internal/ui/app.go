@@ -607,6 +607,7 @@ func (a App) handleSync() (tea.Model, tea.Cmd) {
 		if err := data.SyncPush(cfg, blob, mp); err != nil {
 			return syncDoneMsg{err: err}
 		}
+		cfg.SyncEnabled = true
 		_ = data.SaveConfig(cfg)
 		return syncDoneMsg{}
 	}

@@ -95,6 +95,14 @@ On first launch krypt creates a new vault. **Choose a strong master password —
 
 ---
 
+## Reset vault
+
+If you need to start fresh (e.g. forgotten master password), press **`ctrl+r`** on the unlock screen to enter the danger zone. Type `delete` to confirm — this permanently removes your vault and all krypt config files. The directory itself (`~/.config/krypt/`) is left in place.
+
+> **This cannot be undone.**
+
+---
+
 ## Brute force protection
 
 krypt allows a maximum of **5 failed unlock attempts** (master password and 2FA combined). On the 5th failure:

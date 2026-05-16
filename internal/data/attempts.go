@@ -147,6 +147,29 @@ func DestroyVault() {
 	ResetAttempts()
 }
 
+// ResetAll deletes every krypt-managed file in the config directory so the
+// user can start fresh. The directory itself is left in place.
+func ResetAll() error {
+	base, err := configPath()
+	if err != nil {
+		return err
+	}
+	files := []string{
+		vaultFile,
+		twoFAFile,
+		cfgFile,
+		"attempts.json",
+		".vault-secret",
+	}
+	for _, f := range files {
+		p := filepath.Join(base, f)
+		if err := os.Remove(p); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove %s: %w", f, err)
+		}
+	}
+	return nil
+}
+
 func saveAttempts(n int) {
 	secret, err := loadOrCreateSecret()
 	if err != nil {

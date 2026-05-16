@@ -165,6 +165,10 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case unlockVerify2FAMsg:
 		return a.handleVerify2FA(msg)
 
+	case UnlockResetMsg:
+		_ = data.ResetAll()
+		return a, tea.Quit
+
 	// ── Form events ─────────────────────────────────────────────────────────
 	case FormSubmitMsg:
 		a.mode = modeNav

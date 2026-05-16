@@ -15,6 +15,7 @@ const (
 	unlockStepPassword unlockStep = iota
 	unlockStepTOTP
 	unlockStepSetup2FA // shown after first vault creation to offer 2FA setup
+	unlockStepReset    // danger zone: type "delete" to wipe all config files
 )
 
 // UnlockDoneMsg is emitted when the user successfully authenticates.
@@ -28,11 +29,15 @@ type Unlock2FASetupMsg struct {
 	MasterPassword string
 }
 
+// UnlockResetMsg is emitted when the user confirms a full vault reset.
+type UnlockResetMsg struct{}
+
 // UnlockModel handles the master-password (+ optional TOTP) unlock screen.
 type UnlockModel struct {
 	step        unlockStep
 	password    textinput.Model
 	totp        textinput.Model
+	resetInput  textinput.Model
 	twoFASecret string // base32 secret shown during setup
 	has2FA      bool
 	isNewVault  bool
@@ -53,10 +58,15 @@ func NewUnlockModel(has2FA, isNewVault bool) UnlockModel {
 	tp.Placeholder = "123456"
 	tp.CharLimit = 6
 
+	ri := textinput.New()
+	ri.Placeholder = `type "delete" to confirm`
+	ri.CharLimit = 10
+
 	return UnlockModel{
 		step:       unlockStepPassword,
 		password:   pw,
 		totp:       tp,
+		resetInput: ri,
 		has2FA:     has2FA,
 		isNewVault: isNewVault,
 	}
@@ -73,6 +83,15 @@ func (m UnlockModel) Update(msg tea.Msg) (UnlockModel, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch msg.String() {
+		case "ctrl+r":
+			if m.step == unlockStepPassword {
+				m.step = unlockStepReset
+				m.errMsg = ""
+				m.password.Blur()
+				m.resetInput.SetValue("")
+				m.resetInput.Focus()
+				return m, textinput.Blink
+			}
 		case "enter":
 			m.errMsg = "" // clear error only on submit
 			switch m.step {
@@ -99,6 +118,12 @@ func (m UnlockModel) Update(msg tea.Msg) (UnlockModel, tea.Cmd) {
 				return m, func() tea.Msg {
 					return unlockVerify2FAMsg{password: m.password.Value(), code: code, isNewVault: m.isNewVault}
 				}
+			case unlockStepReset:
+				if strings.TrimSpace(m.resetInput.Value()) != "delete" {
+					m.errMsg = `type the word "delete" to confirm`
+					return m, nil
+				}
+				return m, func() tea.Msg { return UnlockResetMsg{} }
 			}
 		case "esc":
 			if m.step == unlockStepTOTP {
@@ -106,6 +131,14 @@ func (m UnlockModel) Update(msg tea.Msg) (UnlockModel, tea.Cmd) {
 				m.step = unlockStepPassword
 				m.totp.Blur()
 				m.totp.SetValue("")
+				m.password.Focus()
+				return m, textinput.Blink
+			}
+			if m.step == unlockStepReset {
+				m.errMsg = ""
+				m.step = unlockStepPassword
+				m.resetInput.Blur()
+				m.resetInput.SetValue("")
 				m.password.Focus()
 				return m, textinput.Blink
 			}
@@ -118,6 +151,8 @@ func (m UnlockModel) Update(msg tea.Msg) (UnlockModel, tea.Cmd) {
 		m.password, cmd = m.password.Update(msg)
 	case unlockStepTOTP:
 		m.totp, cmd = m.totp.Update(msg)
+	case unlockStepReset:
+		m.resetInput, cmd = m.resetInput.Update(msg)
 	}
 	return m, cmd
 }
@@ -140,6 +175,12 @@ func (m UnlockModel) View() string {
 		hint := UnlockHintStyle.Render("6-digit code from your authenticator app  •  esc to go back")
 		tp := FormActiveInputStyle.Width(20).Render(m.totp.View())
 		body = lipgloss.JoinVertical(lipgloss.Center, label, tp, hint)
+	case unlockStepReset:
+		warning := UnlockErrorStyle.Render("⚠  DANGER ZONE")
+		desc := UnlockHintStyle.Render("This will permanently delete your vault and all krypt data.")
+		desc2 := UnlockHintStyle.Render("This cannot be undone.")
+		ri := FormActiveInputStyle.Width(36).Render(m.resetInput.View())
+		body = lipgloss.JoinVertical(lipgloss.Center, warning, desc, desc2, ri)
 	}
 
 	if m.errMsg != "" {
@@ -147,9 +188,19 @@ func (m UnlockModel) View() string {
 	}
 
 	box := UnlockBoxStyle.Render(body)
-	help := HelpKeyStyle.Render("ctrl+c") + HelpSepStyle.Render("  quit")
 
-	content := lipgloss.JoinVertical(lipgloss.Center, banner, box, help)
+	var helpLine string
+	switch m.step {
+	case unlockStepReset:
+		helpLine = HelpKeyStyle.Render("enter") + HelpSepStyle.Render("  confirm  •  ") +
+			HelpKeyStyle.Render("esc") + HelpSepStyle.Render("  cancel  •  ") +
+			HelpKeyStyle.Render("ctrl+c") + HelpSepStyle.Render("  quit")
+	default:
+		helpLine = HelpKeyStyle.Render("ctrl+r") + HelpSepStyle.Render("  reset vault  •  ") +
+			HelpKeyStyle.Render("ctrl+c") + HelpSepStyle.Render("  quit")
+	}
+
+	content := lipgloss.JoinVertical(lipgloss.Center, banner, box, helpLine)
 
 	if m.width > 0 {
 		return lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, content)

@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"crypto/rand"
+	"math/big"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textarea"
@@ -9,6 +11,19 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/mojoaar/krypt/internal/data"
 )
+
+// generatePassword returns a cryptographically random 30-character password
+// using uppercase, lowercase, digits, and safe symbols.
+func generatePassword() string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*-_+=?"
+	const length = 30
+	b := make([]byte, length)
+	for i := range b {
+		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		b[i] = charset[n.Int64()]
+	}
+	return string(b)
+}
 
 // FormSubmitMsg is emitted when the user submits the form.
 type FormSubmitMsg struct {
@@ -357,6 +372,19 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 			}
 			return f, nil
 
+		case "ctrl+g":
+			// Generate a strong 30-char password for Login password or SSH passphrase.
+			isLoginPw := f.entryType == data.EntryTypeLogin && f.focus == int(fLoginPassword)
+			isSSHPass := f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPassphrase)
+			if !f.typePicker && (isLoginPw || isSSHPass) {
+				pw := generatePassword()
+				f.inputs[f.focus].SetValue(pw)
+				// Reveal so user can see the generated password.
+				f.showMasked[f.focus] = true
+				f.inputs[f.focus].EchoMode = textinput.EchoNormal
+			}
+			return f, nil
+
 		case "esc":
 			return f, func() tea.Msg { return FormCancelMsg{} }
 
@@ -575,6 +603,13 @@ func (f Form) View() string {
 		hint += HelpDescStyle.Render("  ") +
 			HelpKeyStyle.Render("ctrl+r") + HelpDescStyle.Render(" "+revealLabel)
 	}
+	// Password / passphrase generator hint
+	isLoginPwFocused := !f.typePicker && f.entryType == data.EntryTypeLogin && f.focus == int(fLoginPassword)
+	isSSHPassFocused := !f.typePicker && f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPassphrase)
+	if isLoginPwFocused || isSSHPassFocused {
+		hint += HelpDescStyle.Render("  ") +
+			HelpKeyStyle.Render("ctrl+g") + HelpDescStyle.Render(" generate")
+	}
 	// SSH private key reveal hint
 	if !f.typePicker && f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPrivateKey) {
 		revealLabel := "show private key"
@@ -734,7 +769,22 @@ func (f Form) viewFields() string {
 		} else {
 			renderedInput = FormInputStyle.Width(inputW).Render(inp.View())
 		}
-		rows = append(rows, FormLabelStyle.Render(label))
+
+		// For password / passphrase fields, show a right-aligned [ctrl+g] generate hint on the label row.
+		isLoginPw := f.entryType == data.EntryTypeLogin && i == int(fLoginPassword)
+		isSSHPass := f.entryType == data.EntryTypeSSHKey && i == int(fSSHPassphrase)
+		if (isLoginPw || isSSHPass) && i == f.focus {
+			genHint := HelpKeyStyle.Render("ctrl+g") + HelpDescStyle.Render(" generate")
+			labelW := inputW + 4 // account for border padding
+			labelText := FormLabelStyle.Render(label)
+			gap := labelW - lipgloss.Width(labelText) - lipgloss.Width(genHint)
+			if gap < 1 {
+				gap = 1
+			}
+			rows = append(rows, labelText+strings.Repeat(" ", gap)+genHint)
+		} else {
+			rows = append(rows, FormLabelStyle.Render(label))
+		}
 		rows = append(rows, renderedInput)
 	}
 

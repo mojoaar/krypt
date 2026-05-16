@@ -437,6 +437,14 @@ func (a App) updateNav(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return a.handleSync()
 		case "t":
 			return a.open2FASetup()
+		case "g":
+			pw := generatePassword()
+			if err := clipboard.WriteAll(pw); err != nil {
+				a.setStatus("generate failed: "+err.Error(), true)
+			} else {
+				a.setStatus("strong password generated and copied", false)
+			}
+			return a, nil
 		}
 	}
 	return a, nil
@@ -755,8 +763,7 @@ func (a App) viewHelpBar() string {
 			{"/", "search"},
 			{"s", "sync"},
 			{"t", "2FA setup"},
-			{"?", "help"},
-			{"q", "quit"},
+			{"g", "generate pw"},
 		}
 	case modeDetail:
 		hints = []hint{

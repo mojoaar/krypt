@@ -29,6 +29,7 @@ const (
 	modeSync                   // sync in progress
 	mode2FA                    // 2FA setup / disable
 	modeExport                 // export overlay
+	modeMenu                   // actions menu overlay
 )
 
 type focusTarget int
@@ -272,6 +273,8 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return a.update2FA(msg)
 	case modeExport:
 		return a.updateExport(msg)
+	case modeMenu:
+		return a.updateMenu(msg)
 	case modeNav:
 		return a.updateNav(msg)
 	case modeDetail:
@@ -375,6 +378,34 @@ func (a App) updateExport(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	a.export, cmd = a.export.Update(msg)
 	return a, cmd
+}
+
+func (a App) updateMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
+	k, ok := msg.(tea.KeyMsg)
+	if !ok {
+		return a, nil
+	}
+	switch k.String() {
+	case "esc", "m", "q":
+		a.mode = modeNav
+	case "g":
+		a.mode = modeNav
+		pw := generatePassword()
+		if err := clipboard.WriteAll(pw); err != nil {
+			a.setStatus("generate failed: "+err.Error(), true)
+		} else {
+			a.setStatus("strong password generated and copied", false)
+		}
+		return a, clearStatusAfter(5 * time.Second)
+	case "t":
+		a.mode = modeNav
+		return a.open2FASetup()
+	case "X":
+		a.mode = modeNav
+		a.export.Open()
+		a.mode = modeExport
+	}
+	return a, nil
 }
 
 func (a App) updateHelp(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -487,6 +518,9 @@ func (a App) updateNav(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "X":
 			a.export.Open()
 			a.mode = modeExport
+			return a, nil
+		case "m":
+			a.mode = modeMenu
 			return a, nil
 		}
 	}
@@ -705,6 +739,8 @@ func (a App) View() string {
 		return a.twoFA.View()
 	case modeExport:
 		return a.export.View()
+	case modeMenu:
+		return a.viewMenu()
 	}
 	return a.viewMain()
 }
@@ -741,6 +777,36 @@ func (a App) viewMain() string {
 	}
 
 	return lipgloss.JoinVertical(lipgloss.Left, banner, middle, statusBar, helpBar)
+}
+
+func (a App) viewMenu() string {
+	type item struct{ key, desc string }
+	items := []item{
+		{"g", "generate password"},
+		{"t", "2FA setup / disable"},
+		{"X", "export vault"},
+	}
+
+	title := lipgloss.NewStyle().Foreground(colorAccent).Bold(true).Render("⚡ Actions")
+
+	var rows []string
+	rows = append(rows, title, "")
+	for _, it := range items {
+		k := HelpKeyStyle.Width(4).Render(it.key)
+		d := HelpDescStyle.Render(it.desc)
+		rows = append(rows, "  "+k+d)
+	}
+	rows = append(rows, "")
+	rows = append(rows, HelpDescStyle.Render("esc  close"))
+
+	inner := strings.Join(rows, "\n")
+	box := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(colorPrimary).
+		Padding(1, 3).
+		Render(inner)
+
+	return lipgloss.Place(a.width, a.height, lipgloss.Center, lipgloss.Center, box)
 }
 
 func (a App) viewBanner() string {
@@ -800,9 +866,7 @@ func (a App) viewHelpBar() string {
 			{"enter", "open"},
 			{"/", "search"},
 			{"s", "sync"},
-			{"t", "2FA setup"},
-			{"g", "generate pw"},
-			{"X", "export"},
+			{"m", "menu"},
 		}
 	case modeDetail:
 		hints = []hint{
@@ -913,8 +977,11 @@ func (a App) buildHelpContent(w int) string {
 			{"", "falls back to plain text in unsupported terminals"},
 		}},
 		{"App", [][2]string{
-			{"s", "sync vault to GitHub Gist"},
+			{"m", "open actions menu (generate pw, 2FA, export)"},
+			{"g", "generate password and copy to clipboard"},
+			{"t", "2FA setup / disable"},
 			{"X", "export vault (plaintext or encrypted JSON)"},
+			{"s", "sync vault to GitHub Gist"},
 			{"?", "toggle this help"},
 			{"q  or  ctrl+c", "quit"},
 		}},

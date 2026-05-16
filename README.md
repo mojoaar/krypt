@@ -268,6 +268,9 @@ make build
 - Press `ctrl+g` on the Password or Passphrase field in the add/edit form → generates and fills the field, auto-revealed so you can see the result; hint shown inline on the label row and in the bottom bar
 - Bottom hint bar on main screen cleaned up: removed redundant `? help` and `q quit` (already shown top-right); replaced with `g generate pw`
 
+**Bug fixes**
+- Sync via `KRYPT_GITHUB_TOKEN` environment variable now works without requiring `sync_enabled: true` in `config.json` — setting the env var is sufficient
+
 ---
 
 ### v1.1.0

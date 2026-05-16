@@ -241,7 +241,7 @@ Platforms built: `darwin-arm64`, `darwin-amd64`, `linux-amd64`, `linux-arm64`, `
 Releases use `git tag` for versioning — the version is injected at build time via `git describe --tags`:
 
 ```bash
-git tag v1.0.0
+git tag v1.2.0
 make build
 ```
 
@@ -261,16 +261,20 @@ make build
 
 ## Changelog
 
+### v1.2.0
+
+**Password generator**
+- Press `g` on the main screen → generates a 30-char cryptographically random password (uppercase + lowercase + digits + symbols) and copies to clipboard; status clears after 5 seconds
+- Press `ctrl+g` on the Password or Passphrase field in the add/edit form → generates and fills the field, auto-revealed so you can see the result; hint shown inline on the label row and in the bottom bar
+- Bottom hint bar on main screen cleaned up: removed redundant `? help` and `q quit` (already shown top-right); replaced with `g generate pw`
+
+---
+
 ### v1.1.0
 
 **Security / UX**
 - Vault reset from the unlock screen — press `ctrl+r`, type `delete` to confirm; permanently removes vault and all krypt config files so you can start fresh
 - Unlock screen hint bar updated to show `ctrl+r  reset vault`
-
-**Password generator**
-- Press `g` on the main screen → generates a 30-char cryptographically random password (uppercase + lowercase + digits + symbols) and copies it to clipboard; status clears after 5 seconds
-- Press `ctrl+g` on the Password or Passphrase field in the add/edit form → generates and fills the field, auto-revealed so you can see the result; hint shown inline on the label row and in the bottom bar
-- Bottom hint bar on main screen cleaned up: removed redundant `? help` and `q quit` (already shown top-right); replaced with `g generate pw`
 
 ---
 

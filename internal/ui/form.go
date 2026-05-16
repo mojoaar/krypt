@@ -775,7 +775,7 @@ func (f Form) viewFields() string {
 		isSSHPass := f.entryType == data.EntryTypeSSHKey && i == int(fSSHPassphrase)
 		if (isLoginPw || isSSHPass) && i == f.focus {
 			genHint := HelpKeyStyle.Render("ctrl+g") + HelpDescStyle.Render(" generate")
-			labelW := inputW + 4 // account for border padding
+			labelW := lipgloss.Width(renderedInput) // match exact rendered width of input box
 			labelText := FormLabelStyle.Render(label)
 			gap := labelW - lipgloss.Width(labelText) - lipgloss.Width(genHint)
 			if gap < 1 {

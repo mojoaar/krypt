@@ -159,7 +159,7 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 |------|--------|
 | **Login** | Name, Username, Password (masked), URL (clickable hyperlink), Notes, Tags |
 | **Note** | Name, Content, Tags |
-| **Card** | Name, Cardholder, Number (masked), Expiry, CVC (masked), Tags |
+| **Card** | Name, Cardholder, Number (masked), Expiry, CVC (masked), PIN (masked), Notes (multiline), Tags |
 | **Identity** | Name, First/Last Name, Email, Phone, Address, Company, SSN (masked), Drivers License (masked), Passport Number (masked), Notes (optional secure), Tags |
 | **SSH Key** | Name, Public Key, Private Key (multiline, masked by default), Passphrase (masked), Host, Tags |
 
@@ -188,8 +188,10 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 |-----|--------|
 | `u` | copy username (Login) / email (Identity) |
 | `p` | copy password (Login) / **private key** (SSH Key) |
-| `c` | copy note content (Note) |
-| `n` | copy card number |
+| `c` | copy note content (Note) / copy card CVC (Card) |
+| `n` | copy card number (Card) |
+| `x` | copy card expiry (Card) |
+| `i` | copy card PIN (Card) |
 | `k` | copy SSH public key |
 | `s` | copy SSN (Identity) — in nav mode `s` syncs to Gist instead |
 | `l` | copy drivers license (Identity) |
@@ -290,7 +292,7 @@ krypt list --type=ssh
 |------|--------|
 | `login` | `password` `username` `url` `notes` |
 | `note` | `content` |
-| `card` | `number` `expiry` `cvc` `holder` `bank` |
+| `card` | `number` `expiry` `cvc` `pin` `holder` `bank` `notes` |
 | `identity` | `email` `phone` `address` `company` `ssn` `license` `passport` `firstname` `lastname` |
 | `ssh` | `pubkey` `privkey` `passphrase` `host` |
 
@@ -350,6 +352,11 @@ make build
 ## Changelog
 
 ### v1.4.0
+
+**Card entry improvements**
+- Added **PIN** field (masked) — shown as `••••`, revealed with `space` alongside card number and CVC
+- Added **Notes** field (multiline textarea) — same pattern as Identity notes
+- `i` copies PIN to clipboard in both list and detail views
 
 **CLI secret retrieval**
 - `krypt get <name> <field>` — print a secret to stdout

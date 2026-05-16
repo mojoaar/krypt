@@ -444,7 +444,7 @@ func (a App) updateNav(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				a.setStatus("strong password generated and copied", false)
 			}
-			return a, nil
+			return a, clearStatusAfter(5 * time.Second)
 		}
 	}
 	return a, nil

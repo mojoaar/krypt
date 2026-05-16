@@ -41,6 +41,7 @@ Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss
 - **Argon2id key derivation** — your password is never stored; only a derived key is used in memory
 - **Brute force protection** — max 5 failed unlock attempts; vault destroyed on limit; attempt counter is HMAC-signed to prevent tampering
 - **Optional 2FA unlock** — add a TOTP second factor (any authenticator app) to the unlock screen; set up entirely within the TUI
+- **Password generator** — generate a strong 30-character password from the main screen (`g`) or inline in the form (`ctrl+g`); copies to clipboard instantly
 - **Tag support** — tag entries and filter/search by tag
 - **Copy to clipboard** — context-aware copy keybindings per entry type
 - **Clickable hyperlinks** — Login URLs rendered as terminal hyperlinks (iTerm2, WezTerm, kitty, Ghostty)
@@ -198,16 +199,24 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 |-----|--------|
 | `tab` / `↑↓` | navigate fields |
 | `ctrl+r` | show / hide masked field (password, CVC, passphrase, private key) |
+| `ctrl+g` | generate strong 30-char password (on password / passphrase fields) |
 | `ctrl+s` | save entry |
 | `esc` | cancel |
 
 ### App
 | Key | Action |
 |-----|--------|
+| `g` | generate strong password and copy to clipboard |
 | `t` | 2FA setup / disable |
 | `s` | sync to GitHub Gist |
 | `?` | toggle help overlay (scrollable) |
 | `q` / `ctrl+c` | quit |
+
+### Unlock screen
+| Key | Action |
+|-----|--------|
+| `ctrl+r` | reset vault (danger zone — type `delete` to confirm) |
+| `ctrl+c` | quit |
 
 ---
 
@@ -257,6 +266,11 @@ make build
 **Security / UX**
 - Vault reset from the unlock screen — press `ctrl+r`, type `delete` to confirm; permanently removes vault and all krypt config files so you can start fresh
 - Unlock screen hint bar updated to show `ctrl+r  reset vault`
+
+**Password generator**
+- Press `g` on the main screen → generates a 30-char cryptographically random password (uppercase + lowercase + digits + symbols) and copies it to clipboard; status clears after 5 seconds
+- Press `ctrl+g` on the Password or Passphrase field in the add/edit form → generates and fills the field, auto-revealed so you can see the result; hint shown inline on the label row and in the bottom bar
+- Bottom hint bar on main screen cleaned up: removed redundant `? help` and `q quit` (already shown top-right); replaced with `g generate pw`
 
 ---
 

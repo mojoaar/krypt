@@ -5,19 +5,29 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/mojoaar/krypt/internal/cli"
 	"github.com/mojoaar/krypt/internal/ui"
 )
 
 var version = "dev"
 
 func main() {
-	for _, arg := range os.Args[1:] {
+	args := os.Args[1:]
+
+	// --version / -v
+	for _, arg := range args {
 		if arg == "--version" || arg == "-v" {
 			fmt.Println("krypt " + version)
 			return
 		}
 	}
 
+	// CLI subcommands (get, list, help)
+	if cli.Run(args) {
+		return
+	}
+
+	// Launch TUI
 	app := ui.NewApp(version)
 	p := tea.NewProgram(app, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {

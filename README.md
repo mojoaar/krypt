@@ -48,6 +48,7 @@ Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss
 - **Copy to clipboard** — context-aware copy keybindings per entry type
 - **Clickable hyperlinks** — Login URLs rendered as terminal hyperlinks (iTerm2, WezTerm, kitty, Ghostty)
 - **Optional GitHub Gist sync** — push your encrypted vault to a private Gist
+- **CLI secret retrieval** — `krypt get <name> <field>` and `krypt list` for scripting and automation
 
 ---
 
@@ -256,6 +257,57 @@ The export file is written with `0600` permissions (owner read/write only).
 
 ---
 
+## CLI usage
+
+krypt can retrieve secrets non-interactively, useful for scripts, dotfiles, and CI.
+
+### Get a secret
+
+```bash
+krypt get <name> <field>           # print to stdout
+krypt get <name> <field> --copy    # copy to clipboard silently
+```
+
+**Examples:**
+```bash
+krypt get "iCloud" password
+krypt get "iCloud" username --copy
+krypt get "GitHub SSH" pubkey
+krypt get "Visa" number
+```
+
+### List entries
+
+```bash
+krypt list                    # all entries: [login] iCloud
+krypt list --type=login       # filter by type
+krypt list --type=ssh
+```
+
+### Fields by entry type
+
+| Type | Fields |
+|------|--------|
+| `login` | `password` `username` `url` `notes` |
+| `note` | `content` |
+| `card` | `number` `expiry` `cvc` `holder` `bank` |
+| `identity` | `email` `phone` `address` `company` `ssn` `license` `passport` `firstname` `lastname` |
+| `ssh` | `pubkey` `privkey` `passphrase` `host` |
+
+### Master password
+
+```bash
+# Interactive prompt (no echo)
+krypt get "iCloud" password
+
+# Non-interactive / scripting
+KRYPT_MASTER_PASSWORD=your-password krypt list
+```
+
+> **2FA note:** 2FA is skipped for CLI commands. The vault is still AES-256-GCM encrypted and requires the master password. 2FA protects the interactive unlock screen, not the vault file itself.
+
+---
+
 ## Login URL hyperlinks
 
 When viewing a Login entry, the URL is rendered as a **clickable terminal hyperlink** (`cmd+click` on macOS, `ctrl+click` elsewhere).
@@ -296,6 +348,19 @@ make build
 ---
 
 ## Changelog
+
+### v1.4.0
+
+**CLI secret retrieval**
+- `krypt get <name> <field>` — print a secret to stdout
+- `krypt get <name> <field> --copy` — copy to clipboard silently
+- `krypt list [--type=<type>]` — list all entries with type prefix
+- Master password via `KRYPT_MASTER_PASSWORD` env var or secure interactive prompt (no echo)
+- 2FA skipped for CLI (vault still AES-256-GCM encrypted; 2FA protects interactive unlock only)
+- `krypt help` — full usage reference
+- Name matching: exact first, then case-insensitive contains fallback
+
+---
 
 ### v1.3.0
 

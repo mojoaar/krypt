@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -587,7 +588,8 @@ func (a App) copyField(e data.Entry, key string) (tea.Model, tea.Cmd) {
 // ── Sync ─────────────────────────────────────────────────────────────────────
 
 func (a App) handleSync() (tea.Model, tea.Cmd) {
-	if !a.syncCfg.SyncEnabled {
+	tokenInEnv := os.Getenv("KRYPT_GITHUB_TOKEN") != ""
+	if !a.syncCfg.SyncEnabled && !tokenInEnv && a.syncCfg.Token == "" {
 		a.setStatus("sync not configured — set KRYPT_GITHUB_TOKEN to enable", true)
 		return a, clearStatusAfter(4 * time.Second)
 	}

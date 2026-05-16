@@ -85,7 +85,9 @@ type Entry struct {
 	CardNumber string `json:"card_number,omitempty"`
 	Expiry     string `json:"expiry,omitempty"`
 	CVV        string `json:"cvc,omitempty"`
+	PIN        string `json:"pin,omitempty"`
 	Bank       string `json:"bank,omitempty"`
+	CardNotes  string `json:"card_notes,omitempty"`
 
 	// Identity
 	FirstName      string `json:"first_name,omitempty"`

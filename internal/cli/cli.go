@@ -144,6 +144,9 @@ func fieldValue(e data.Entry, field string) string {
 		if e.Type == data.EntryTypeLogin {
 			return e.Notes
 		}
+		if e.Type == data.EntryTypeCard {
+			return e.CardNotes
+		}
 		// Note entry
 		return e.Content
 	case "content":
@@ -155,10 +158,14 @@ func fieldValue(e data.Entry, field string) string {
 		return e.Expiry
 	case "cvc", "cvv":
 		return e.CVV
+	case "pin":
+		return e.PIN
 	case "holder", "cardholder":
 		return e.CardHolder
 	case "bank":
 		return e.Bank
+	case "cardnotes":
+		return e.CardNotes
 	// ── Identity ───────────────────────────────────────────────────────────
 	case "email":
 		return e.Email

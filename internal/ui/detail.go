@@ -88,6 +88,16 @@ func (d DetailView) View() string {
 		} else {
 			rows = append(rows, d.row("CVC", "•••"))
 		}
+		if e.PIN != "" {
+			if d.showCVC {
+				rows = append(rows, d.row("PIN", e.PIN))
+			} else {
+				rows = append(rows, d.row("PIN", "••••"))
+			}
+		}
+		if e.CardNotes != "" {
+			rows = append(rows, d.rowMultiline("Notes", e.CardNotes))
+		}
 
 	case data.EntryTypeIdentity:
 		rows = append(rows, d.row("Name", e.FirstName+" "+e.LastName))
@@ -211,6 +221,7 @@ func (d DetailView) helpBar() string {
 			HelpKeyStyle.Render("n")+HelpSepStyle.Render(" copy number"),
 			HelpKeyStyle.Render("x")+HelpSepStyle.Render(" copy expiry"),
 			HelpKeyStyle.Render("c")+HelpSepStyle.Render(" copy cvc"),
+			HelpKeyStyle.Render("i")+HelpSepStyle.Render(" copy pin"),
 			HelpKeyStyle.Render("space")+HelpSepStyle.Render(" reveal all"),
 		)
 	case data.EntryTypeIdentity:

@@ -587,6 +587,8 @@ func (a App) updateDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return a.handleCopyDetail("b")
 		case "o":
 			return a.handleCopyDetail("o")
+		case "i":
+			return a.handleCopyDetail("i")
 		}
 	}
 	return a, nil
@@ -641,6 +643,8 @@ func (a App) copyField(e data.Entry, key string) (tea.Model, tea.Cmd) {
 			value, label = e.Expiry, "expiry"
 		case "c":
 			value, label = e.CVV, "cvc"
+		case "i":
+			value, label = e.PIN, "pin"
 		}
 	case data.EntryTypeSSHKey:
 		switch key {

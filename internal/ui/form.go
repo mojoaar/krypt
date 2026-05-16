@@ -62,7 +62,9 @@ const (
 	fCardNumber
 	fCardExpiry
 	fCardCVC
+	fCardPIN
 	fCardBank
+	fCardNotes
 	fCardTags
 	fCardCount
 )
@@ -109,6 +111,7 @@ type Form struct {
 	noteSecure          bool           // secure toggle for Note entries
 	identityNoteArea    textarea.Model // multiline notes for Identity entries
 	identityNotesSecure bool           // secure toggle for Identity notes
+	cardNoteArea        textarea.Model // multiline notes for Card entries
 	sshPrivKeyArea      textarea.Model // multiline private key for SSH entries
 	sshPrivKeyRevealed  bool           // whether private key textarea is shown
 	labels              []string
@@ -158,7 +161,9 @@ func (f *Form) OpenEdit(e data.Entry) {
 		f.inputs[fCardNumber].SetValue(e.CardNumber)
 		f.inputs[fCardExpiry].SetValue(e.Expiry)
 		f.inputs[fCardCVC].SetValue(e.CVV)
+		f.inputs[fCardPIN].SetValue(e.PIN)
 		f.inputs[fCardBank].SetValue(e.Bank)
+		f.cardNoteArea.SetValue(e.CardNotes)
 		f.inputs[fCardTags].SetValue(strings.Join(e.Tags, ", "))
 	case data.EntryTypeIdentity:
 		f.inputs[fIdentityName].SetValue(e.Name)
@@ -203,12 +208,14 @@ func (f *Form) buildInputs() {
 		f.noteArea = newNoteArea()
 		f.noteSecure = false
 	case data.EntryTypeCard:
-		f.labels = []string{"Name", "Card Holder", "Card Number", "Expiry", "CVC", "Bank", "Tags"}
-		f.masked = []bool{false, false, true, false, true, false, false}
+		f.labels = []string{"Name", "Card Holder", "Card Number", "Expiry", "CVC", "PIN", "Bank", "Notes", "Tags"}
+		f.masked = []bool{false, false, true, false, true, true, false, false, false}
 		f.inputs = makeInputs(int(fCardCount), f.masked)
 		f.inputs[fCardExpiry].Placeholder = "MM/YY"
 		f.inputs[fCardCVC].Placeholder = "123"
+		f.inputs[fCardPIN].Placeholder = "1234"
 		f.inputs[fCardTags].Placeholder = "work, personal"
+		f.cardNoteArea = newNoteArea()
 	case data.EntryTypeIdentity:
 		f.labels = []string{"Name", "First Name", "Last Name", "Email", "Phone", "Address", "Company", "SSN (Social Security Number)", "Drivers License", "Passport Number", "Notes", "Secure Notes", "Tags"}
 		f.masked = []bool{false, false, false, false, false, false, false, true, true, true, false, false, false}
@@ -298,6 +305,15 @@ func (f *Form) focusAt(i int) {
 		}
 		if i == int(fIdentityNotesSecure) {
 			f.inputs[fIdentityNotesSecure].Blur()
+		}
+	}
+	// For Card notes textarea
+	if f.entryType == data.EntryTypeCard {
+		if i == int(fCardNotes) {
+			f.cardNoteArea.Focus()
+			f.inputs[fCardNotes].Blur()
+		} else {
+			f.cardNoteArea.Blur()
 		}
 	}
 	// For SSH private key textarea
@@ -422,6 +438,9 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 			if f.entryType == data.EntryTypeIdentity && f.focus == int(fIdentityNotes) && msg.String() == "enter" {
 				break
 			}
+			if f.entryType == data.EntryTypeCard && f.focus == int(fCardNotes) && msg.String() == "enter" {
+				break
+			}
 			if f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPrivateKey) && f.sshPrivKeyRevealed && msg.String() == "enter" {
 				break
 			}
@@ -448,6 +467,9 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 			if f.entryType == data.EntryTypeIdentity && f.focus == int(fIdentityNotes) && msg.String() == "up" {
 				break
 			}
+			if f.entryType == data.EntryTypeCard && f.focus == int(fCardNotes) && msg.String() == "up" {
+				break
+			}
 			if f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPrivateKey) && f.sshPrivKeyRevealed && msg.String() == "up" {
 				break
 			}
@@ -469,6 +491,9 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 				break
 			}
 			if f.entryType == data.EntryTypeIdentity && f.focus == int(fIdentityNotes) && msg.String() == "down" {
+				break
+			}
+			if f.entryType == data.EntryTypeCard && f.focus == int(fCardNotes) && msg.String() == "down" {
 				break
 			}
 			if f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPrivateKey) && f.sshPrivKeyRevealed && msg.String() == "down" {
@@ -503,6 +528,12 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 	if f.entryType == data.EntryTypeIdentity && f.focus == int(fIdentityNotes) {
 		var cmd tea.Cmd
 		f.identityNoteArea, cmd = f.identityNoteArea.Update(msg)
+		return f, cmd
+	}
+	// Card notes field: route to textarea
+	if f.entryType == data.EntryTypeCard && f.focus == int(fCardNotes) {
+		var cmd tea.Cmd
+		f.cardNoteArea, cmd = f.cardNoteArea.Update(msg)
 		return f, cmd
 	}
 	// SSH private key: route to textarea when revealed
@@ -548,7 +579,9 @@ func (f Form) buildEntry() data.Entry {
 		e.CardNumber = f.inputs[fCardNumber].Value()
 		e.Expiry = f.inputs[fCardExpiry].Value()
 		e.CVV = f.inputs[fCardCVC].Value()
+		e.PIN = f.inputs[fCardPIN].Value()
 		e.Bank = f.inputs[fCardBank].Value()
+		e.CardNotes = f.cardNoteArea.Value()
 		e.Tags = parseTags(f.inputs[fCardTags].Value())
 	case data.EntryTypeIdentity:
 		e.Name = f.inputs[fIdentityName].Value()
@@ -718,6 +751,14 @@ func (f Form) viewFields() string {
 			f.identityNoteArea.SetWidth(inputW)
 			rows = append(rows, FormLabelStyle.Render(label))
 			rows = append(rows, f.identityNoteArea.View())
+			continue
+		}
+
+		// Card notes textarea
+		if f.entryType == data.EntryTypeCard && i == int(fCardNotes) {
+			f.cardNoteArea.SetWidth(inputW)
+			rows = append(rows, FormLabelStyle.Render(label))
+			rows = append(rows, f.cardNoteArea.View())
 			continue
 		}
 

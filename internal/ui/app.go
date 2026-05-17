@@ -1091,6 +1091,22 @@ func (a App) buildHelpContent(w int) string {
 	lines = append(lines, sep)
 	lines = append(lines, "")
 
+	// ── Password Generator ───────────────────────────────────────────────────
+	lines = append(lines, head("Password Generator"))
+	lines = append(lines, note("Press ")+key("g")+note(" to generate and copy a strong password. Press ")+key("ctrl+g")+note(" in a form."))
+	lines = append(lines, "")
+	lines = append(lines, note("Customize via ")+key("~/.config/krypt/config.json")+note(" under ")+key("password_gen")+note(":"))
+	lines = append(lines, "")
+	lines = append(lines, note("  ")+key("length")+note("      character count (default: 30)"))
+	lines = append(lines, note("  ")+key("uppercase")+note("   include A–Z  (default: true)"))
+	lines = append(lines, note("  ")+key("lowercase")+note("   include a–z  (default: true)"))
+	lines = append(lines, note("  ")+key("digits")+note("      include 0–9  (default: true)"))
+	lines = append(lines, note("  ")+key("symbols")+note("     include symbols  (default: true)"))
+	lines = append(lines, note("  ")+key("symbol_set")+note("  which symbols  (default: !@#$%^&*-_+=?)"))
+	lines = append(lines, "")
+	lines = append(lines, sep)
+	lines = append(lines, "")
+
 	// ── About ────────────────────────────────────────────────────────────────
 	verLabel := a.version
 	if verLabel == "dev" {

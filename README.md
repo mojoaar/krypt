@@ -41,7 +41,7 @@ Built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) + [Lip Gloss
 - **Argon2id key derivation** — your password is never stored; only a derived key is used in memory
 - **Brute force protection** — max 5 failed unlock attempts; vault destroyed on limit; attempt counter is HMAC-signed to prevent tampering
 - **Optional 2FA unlock** — add a TOTP second factor (any authenticator app) to the unlock screen; set up entirely within the TUI
-- **Password generator** — generate a strong 30-character password from the main screen (`g`) or inline in the form (`ctrl+g`); copies to clipboard instantly
+- **Password generator** — generate a strong password (configurable length/charset via `config.json`) from the main screen (`g`) or inline in the form (`ctrl+g`); copies to clipboard instantly
 - **Actions menu** — press `m` to open a compact overlay with quick access to generate password, 2FA setup, and export
 - **Export vault** — export all entries as plaintext or AES-256-GCM encrypted JSON (`x`); choose output path; encrypted export requires a one-time passphrase
 - **Tag support** — tag entries and filter/search by tag
@@ -236,7 +236,7 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 |-----|--------|
 | `tab` / `↑↓` | navigate fields |
 | `ctrl+r` | show / hide masked field (password, CVC, passphrase, private key) |
-| `ctrl+g` | generate strong 30-char password (on password / passphrase fields) |
+| `ctrl+g` | generate strong password and copy (on password / passphrase fields); length and charset configurable via `config.json` |
 | `ctrl+s` | save entry |
 | `esc` | cancel |
 

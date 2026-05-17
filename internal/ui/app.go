@@ -1072,8 +1072,8 @@ func (a App) buildHelpContent(w int) string {
 	if a.store != nil {
 		lines = append(lines, note("Data    ")+key(a.store.Path()))
 	}
-	lines = append(lines, note("Author  ")+key("Morten Johansen")+HelpSepStyle.Render("  |  ")+note("johansen.foo"))
-	lines = append(lines, note("Repo    ")+key("github.com/mojoaar/krypt"))
+	lines = append(lines, note("Author  ")+key("Morten Johansen")+HelpSepStyle.Render("  |  ")+hyperlink("https://johansen.foo", "johansen.foo"))
+	lines = append(lines, note("Repo    ")+hyperlink("https://github.com/mojoaar/krypt", "github.com/mojoaar/krypt"))
 
 	return strings.Join(lines, "\n")
 }
@@ -1127,3 +1127,9 @@ func renderScrollbar(offset, total, visible int) string {
 	return sb.String()
 }
 
+// hyperlink renders an OSC 8 terminal hyperlink. Falls back gracefully in
+// terminals that don't support it (the URL is shown as plain text).
+func hyperlink(url, label string) string {
+	link := "\033]8;;" + url + "\033\\" + label + "\033]8;;\033\\"
+	return HelpKeyStyle.Render(link)
+}

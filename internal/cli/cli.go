@@ -15,7 +15,7 @@ import (
 
 // Run dispatches the CLI subcommand. Returns true if a CLI command was handled
 // (so main.go knows not to launch the TUI).
-func Run(args []string) bool {
+func Run(args []string, version string) bool {
 	if len(args) == 0 {
 		return false
 	}
@@ -27,7 +27,7 @@ func Run(args []string) bool {
 		runList(args[1:])
 		return true
 	case "help", "--help", "-h":
-		printUsage()
+		printUsage(version)
 		return true
 	}
 	return false
@@ -202,22 +202,25 @@ func fieldValue(e data.Entry, field string) string {
 func fieldHelp() string {
 	return `  login    : password  username  url  notes
   note     : content
-  card     : number  expiry  cvc  holder  bank
+  card     : number  expiry  cvc  pin  holder  bank  notes
   identity : email  phone  address  company  ssn  license  passport  firstname  lastname
   ssh      : pubkey  privkey  passphrase  host`
 }
 
-func printUsage() {
-	fmt.Print(`krypt — terminal password manager
+func printUsage(version string) {
+	fmt.Printf(`krypt %s — terminal password manager
+Author : Morten Johansen  <https://johansen.foo>
+Repo   : https://github.com/mojoaar/krypt
 
 Usage:
   krypt                              launch TUI
   krypt get <name> <field> [--copy]  retrieve a secret
   krypt list [--type=<type>]         list entries
+  krypt help                         show this help
   krypt --version                    print version
 
 Fields by entry type:
-` + fieldHelp() + `
+`+fieldHelp()+`
 
 Master password:
   Set KRYPT_MASTER_PASSWORD env var for non-interactive use,
@@ -232,7 +235,7 @@ Examples:
   krypt get "iCloud" password --copy
   krypt get "GitHub SSH" pubkey
   KRYPT_MASTER_PASSWORD=xxx krypt list --type=login
-`)
+`, version)
 }
 
 func fatalf(format string, args ...any) {

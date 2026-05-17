@@ -23,7 +23,7 @@ func main() {
 	}
 
 	// CLI subcommands (get, list, help)
-	if cli.Run(args) {
+	if cli.Run(args, version) {
 		return
 	}
 

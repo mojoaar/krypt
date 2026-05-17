@@ -145,9 +145,6 @@ func (l ListView) View() string {
 		absIdx := i + scrollOffset
 		badge := BadgeStyle(string(e.Type)).Render(data.EntryTypeBadge(e.Type))
 		name := truncate(e.Name, nameW)
-		if e.Favorite {
-			name = lipgloss.NewStyle().Foreground(colorAccent).Render("★") + " " + truncate(e.Name, nameW-2)
-		}
 		detail := truncate(e.DetailLine(), detailW)
 		updated := e.UpdatedAt.Format("Jan 02 2006")
 		if e.UpdatedAt.IsZero() {

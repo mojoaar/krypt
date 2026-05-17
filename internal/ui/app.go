@@ -718,7 +718,7 @@ func (a *App) rebuildList() {
 		return
 	}
 	entries := a.store.Entries()
-	a.sidebar.Rebuild(entries)
+	a.sidebar.Rebuild(entries, a.syncCfg.EffectiveShowCounts())
 	typeF, tagF := a.sidebar.ActiveFilter()
 	filtered := FilterAndSort(entries, typeF, tagF, a.search.Value())
 	a.list.SetEntries(filtered)
@@ -1103,6 +1103,10 @@ func (a App) buildHelpContent(w int) string {
 	lines = append(lines, note("  ")+key("digits")+note("      include 0–9  (default: true)"))
 	lines = append(lines, note("  ")+key("symbols")+note("     include symbols  (default: true)"))
 	lines = append(lines, note("  ")+key("symbol_set")+note("  which symbols  (default: !@#$%^&*-_+=?)"))
+	lines = append(lines, "")
+	lines = append(lines, note("Other config options:"))
+	lines = append(lines, "")
+	lines = append(lines, note("  ")+key("show_counts")+note("  show entry counts in sidebar  (default: true)"))
 	lines = append(lines, "")
 	lines = append(lines, sep)
 	lines = append(lines, "")

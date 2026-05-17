@@ -14,6 +14,15 @@ type Config struct {
 	GistID      string            `json:"gist_id,omitempty"`
 	Token       string            `json:"token,omitempty"` // fallback; prefer KRYPT_GITHUB_TOKEN env
 	PasswordGen PasswordGenConfig `json:"password_gen,omitempty"`
+	ShowCounts  *bool             `json:"show_counts,omitempty"` // default true
+}
+
+// EffectiveShowCounts returns true unless explicitly set to false in config.
+func (c Config) EffectiveShowCounts() bool {
+	if c.ShowCounts == nil {
+		return true
+	}
+	return *c.ShowCounts
 }
 
 // PasswordGenConfig controls the password generator. All fields are optional;

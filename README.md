@@ -100,6 +100,7 @@ Files:
   "sync_enabled": false,
   "gist_id": "",
   "token": "",
+  "show_counts": true,
   "password_gen": {
     "length": 30,
     "uppercase": true,
@@ -116,6 +117,7 @@ Files:
 | `sync_enabled` | `false` | Enable GitHub Gist sync |
 | `gist_id` | `""` | Saved automatically after first push |
 | `token` | `""` | GitHub token fallback (prefer `KRYPT_GITHUB_TOKEN` env var) |
+| `show_counts` | `true` | Show entry counts next to Types and Tags in the sidebar |
 | `password_gen.length` | `30` | Generated password length |
 | `password_gen.uppercase` | `true` | Include A–Z |
 | `password_gen.lowercase` | `true` | Include a–z |

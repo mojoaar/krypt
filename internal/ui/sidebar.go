@@ -41,7 +41,8 @@ func NewSidebar() Sidebar {
 }
 
 // Rebuild rebuilds the sidebar items from the current set of entries.
-func (s *Sidebar) Rebuild(entries []data.Entry) {
+// showCounts controls whether entry counts are shown next to each label.
+func (s *Sidebar) Rebuild(entries []data.Entry, showCounts bool) {
 	// Count per type and per tag
 	typeCounts := map[string]int{}
 	tagCounts := map[string]int{}
@@ -52,15 +53,22 @@ func (s *Sidebar) Rebuild(entries []data.Entry) {
 		}
 	}
 
+	allLabel := "  All"
+	if showCounts {
+		allLabel = fmt.Sprintf("  All [%d]", len(entries))
+	}
 	items := []sidebarItem{
-		{section: sectionAll, label: fmt.Sprintf("  All [%d]", len(entries))},
+		{section: sectionAll, label: allLabel},
 		{section: sectionTypesHeader, label: "  Types"},
 	}
 	for _, t := range data.AllEntryTypes {
-		count := typeCounts[string(t)]
+		label := "  " + data.EntryTypeLabel(t)
+		if showCounts {
+			label = fmt.Sprintf("  %s [%d]", data.EntryTypeLabel(t), typeCounts[string(t)])
+		}
 		items = append(items, sidebarItem{
 			section: sectionByType,
-			label:   fmt.Sprintf("  %s [%d]", data.EntryTypeLabel(t), count),
+			label:   label,
 			filter:  string(t),
 		})
 	}
@@ -80,9 +88,13 @@ func (s *Sidebar) Rebuild(entries []data.Entry) {
 		}
 		sort.Strings(tags)
 		for _, t := range tags {
+			label := "  #" + t
+			if showCounts {
+				label = fmt.Sprintf("  #%s [%d]", t, tagCounts[t])
+			}
 			items = append(items, sidebarItem{
 				section: sectionByTag,
-				label:   fmt.Sprintf("  #%s [%d]", t, tagCounts[t]),
+				label:   label,
 				filter:  t,
 			})
 		}

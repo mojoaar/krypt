@@ -385,6 +385,18 @@ make build
 
 ## Changelog
 
+### v1.4.4
+
+**List view polish**
+- Type badges shortened to 3-char abbreviations (`Log` / `Not` / `Crd` / `Idt` / `SSH`) for a consistent, fixed-width TYPE column
+- Added extra spacing between the TYPE badge and NAME column
+
+**Sidebar entry counts**
+- All, Types, and Tags in the sidebar now show entry counts: `All [20]`, `Login [12]`, `#tag [5]`
+- Configurable via `show_counts` in `~/.config/krypt/config.json` (default: `true`)
+
+---
+
 ### v1.4.3
 
 **Configurable password generator**

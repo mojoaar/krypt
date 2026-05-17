@@ -88,30 +88,40 @@ var (
 			Background(colorBadgeLogin).
 			Foreground(colorText).
 			Bold(true).
+			Width(5).
+			Align(lipgloss.Center).
 			Padding(0, 1)
 
 	BadgeNoteStyle = lipgloss.NewStyle().
 			Background(colorBadgeNote).
 			Foreground(colorText).
 			Bold(true).
+			Width(5).
+			Align(lipgloss.Center).
 			Padding(0, 1)
 
 	BadgeCardStyle = lipgloss.NewStyle().
 			Background(colorBadgeCard).
 			Foreground(colorText).
 			Bold(true).
+			Width(5).
+			Align(lipgloss.Center).
 			Padding(0, 1)
 
 	BadgeIdentityStyle = lipgloss.NewStyle().
 				Background(colorBadgeIdentity).
 				Foreground(colorText).
 				Bold(true).
+				Width(5).
+				Align(lipgloss.Center).
 				Padding(0, 1)
 
 	BadgeSSHStyle = lipgloss.NewStyle().
 			Background(colorBadgeSSH).
 			Foreground(lipgloss.Color("#1E1B4B")). // dark on pale violet for contrast
 			Bold(true).
+			Width(5).
+			Align(lipgloss.Center).
 			Padding(0, 1)
 
 	// Form

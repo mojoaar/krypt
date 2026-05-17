@@ -188,7 +188,7 @@ func (l ListView) View() string {
 }
 
 func renderListRow(badge, name, detail, updated string) string {
-	return fmt.Sprintf("%-7s %-*s  %-*s  %s",
+	return fmt.Sprintf("%-7s  %-*s  %-*s  %s",
 		badge,
 		0, name,
 		0, detail,

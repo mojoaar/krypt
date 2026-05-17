@@ -29,9 +29,11 @@ type sidebarItem struct {
 
 // Sidebar manages the left-hand navigation panel.
 type Sidebar struct {
-	items    []sidebarItem
-	cursor   int
-	focused  bool
+	items        []sidebarItem
+	cursor       int
+	scrollOffset int
+	focused      bool
+	height       int
 }
 
 func NewSidebar() Sidebar {
@@ -78,6 +80,14 @@ func (s *Sidebar) Rebuild(entries []data.Entry) {
 	s.items = items
 }
 
+func (s *Sidebar) visibleRows() int {
+	v := s.height - 4 // 2 border + 2 padding
+	if v < 1 {
+		v = 1
+	}
+	return v
+}
+
 func (s *Sidebar) MoveUp() {
 	for {
 		if s.cursor > 0 {
@@ -87,6 +97,9 @@ func (s *Sidebar) MoveUp() {
 			s.items[s.cursor].section != sectionTypesHeader {
 			break
 		}
+	}
+	if s.cursor < s.scrollOffset {
+		s.scrollOffset = s.cursor
 	}
 }
 
@@ -99,6 +112,10 @@ func (s *Sidebar) MoveDown() {
 			s.items[s.cursor].section != sectionTypesHeader {
 			break
 		}
+	}
+	visible := s.visibleRows()
+	if s.cursor >= s.scrollOffset+visible {
+		s.scrollOffset = s.cursor - visible + 1
 	}
 }
 
@@ -120,19 +137,46 @@ func (s *Sidebar) ActiveFilter() (typeFilter string, tagFilter string) {
 }
 
 func (s *Sidebar) View(height int) string {
+	if s.height > 0 {
+		height = s.height
+	}
 	style := SidebarStyle
 	if s.focused {
 		style = SidebarFocusBorderStyle
 	}
 
+	total := len(s.items)
+	visible := s.visibleRows()
+
+	// Clamp scrollOffset defensively
+	scrollOffset := s.scrollOffset
+	if scrollOffset > total-visible {
+		scrollOffset = total - visible
+	}
+	if scrollOffset < 0 {
+		scrollOffset = 0
+	}
+
+	end := scrollOffset + visible
+	if end > total {
+		end = total
+	}
+
 	var sb strings.Builder
-	for i, item := range s.items {
+
+	// ▲ scroll-up indicator
+	if scrollOffset > 0 {
+		sb.WriteString(lipgloss.NewStyle().Foreground(colorMuted).Render("  ▲ scroll") + "\n")
+	}
+
+	for i, item := range s.items[scrollOffset:end] {
+		absIdx := i + scrollOffset
 		var line string
 		switch item.section {
 		case sectionTagsHeader, sectionTypesHeader:
 			line = SidebarSectionStyle.Render(item.label)
 		default:
-			if i == s.cursor {
+			if absIdx == s.cursor {
 				line = SidebarActiveStyle.Render(fmt.Sprintf("▸ %s", strings.TrimLeft(item.label, " ")))
 			} else {
 				line = SidebarItemStyle.Render(item.label)
@@ -141,11 +185,17 @@ func (s *Sidebar) View(height int) string {
 		sb.WriteString(line + "\n")
 	}
 
+	// ▼ scroll-down indicator
+	if end < total {
+		sb.WriteString(lipgloss.NewStyle().Foreground(colorMuted).Render("  ▼ more") + "\n")
+	}
+
 	inner := strings.TrimRight(sb.String(), "\n")
 	return style.Height(height).Render(inner)
 }
 
 func (s *Sidebar) SetFocused(f bool) { s.focused = f }
+func (s *Sidebar) SetHeight(h int)   { s.height = h }
 
 // CountByType returns a map of entry counts per type string, used for optional display.
 func countByType(entries []data.Entry) map[string]int {

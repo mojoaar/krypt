@@ -150,6 +150,7 @@ func (a App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		listH := a.height - bannerLines - 2
 		a.list.SetSize(listW, listH)
 		a.detail.SetSize(listW, listH)
+		a.sidebar.SetHeight(listH)
 		a.form.SetSize(a.width, a.height)
 		a.confirm.SetSize(a.width, a.height)
 		a.export.SetSize(a.width, a.height)

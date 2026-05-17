@@ -12,11 +12,12 @@ import (
 
 // ListView renders the table of vault entries.
 type ListView struct {
-	entries  []data.Entry // filtered+sorted subset
-	cursor   int
-	focused  bool
-	width    int
-	height   int
+	entries      []data.Entry // filtered+sorted subset
+	cursor       int
+	scrollOffset int
+	focused      bool
+	width        int
+	height       int
 }
 
 func NewListView() ListView { return ListView{} }
@@ -43,8 +44,33 @@ func (l *ListView) SetEntries(entries []data.Entry) {
 
 func (l *ListView) SetSize(w, h int) { l.width = w; l.height = h }
 func (l *ListView) SetFocused(f bool) { l.focused = f }
-func (l *ListView) MoveUp()   { if l.cursor > 0 { l.cursor-- } }
-func (l *ListView) MoveDown() { if l.cursor < len(l.entries)-1 { l.cursor++ } }
+func (l *ListView) MoveUp() {
+	if l.cursor > 0 {
+		l.cursor--
+	}
+	if l.cursor < l.scrollOffset {
+		l.scrollOffset = l.cursor
+	}
+}
+
+func (l *ListView) MoveDown() {
+	if l.cursor < len(l.entries)-1 {
+		l.cursor++
+	}
+	visible := l.visibleRows()
+	if l.cursor >= l.scrollOffset+visible {
+		l.scrollOffset = l.cursor - visible + 1
+	}
+}
+
+// visibleRows is how many entry rows fit in the list panel.
+func (l *ListView) visibleRows() int {
+	v := l.height - 4 // 2 border + 1 padding-top + 1 header
+	if v < 1 {
+		v = 1
+	}
+	return v
+}
 
 // Selected returns the currently highlighted entry, or nil if list is empty.
 func (l *ListView) Selected() *data.Entry {
@@ -64,10 +90,12 @@ func (l ListView) View() string {
 	baseStyle := ListStyle
 	_ = l.focused // focus shown via ▸ cursor indicator only
 
+	// Reserve 1 char for scrollbar column
+	const scrollbarW = 1
 	// "▸ " prefix on cursor row; account for 2 visual chars
 	const cursorPfx = "▸ "
 	const noCursorPfx = "  "
-	usable := l.width - 4 // Padding(1,2) → 4 chars horizontal
+	usable := l.width - 4 - scrollbarW // Padding(1,2) → 4 chars horizontal
 
 	// Column widths: BADGE(7 visual) + cursor prefix(2) + NAME + DETAIL + UPDATED
 	badgeContentW := 5
@@ -87,11 +115,34 @@ func (l ListView) View() string {
 
 	if len(l.entries) == 0 {
 		empty := lipgloss.NewStyle().Foreground(colorMuted).Render("no entries — press 'a' to add one")
-		return baseStyle.Render(lipgloss.JoinVertical(lipgloss.Left, header, empty))
+		inner := lipgloss.JoinVertical(lipgloss.Left, header, empty)
+		// pad with blank scrollbar column
+		return lipgloss.JoinHorizontal(lipgloss.Top,
+			baseStyle.Render(inner),
+			strings.Repeat(" \n", 2),
+		)
 	}
 
-	rows := make([]string, len(l.entries))
-	for i, e := range l.entries {
+	visible := l.visibleRows()
+	total := len(l.entries)
+
+	// Clamp scrollOffset defensively
+	scrollOffset := l.scrollOffset
+	if scrollOffset > total-visible {
+		scrollOffset = total - visible
+	}
+	if scrollOffset < 0 {
+		scrollOffset = 0
+	}
+
+	end := scrollOffset + visible
+	if end > total {
+		end = total
+	}
+
+	rows := make([]string, end-scrollOffset)
+	for i, e := range l.entries[scrollOffset:end] {
+		absIdx := i + scrollOffset
 		badge := BadgeStyle(string(e.Type)).Render(data.EntryTypeBadge(e.Type))
 		name := truncate(e.Name, nameW)
 		detail := truncate(e.DetailLine(), detailW)
@@ -101,7 +152,7 @@ func (l ListView) View() string {
 		}
 
 		pfx := noCursorPfx
-		if i == l.cursor {
+		if absIdx == l.cursor {
 			pfx = cursorPfx
 		}
 
@@ -118,9 +169,9 @@ func (l ListView) View() string {
 			row = row + strings.Repeat(" ", usable-vw)
 		}
 
-		if i == l.cursor && l.focused {
+		if absIdx == l.cursor && l.focused {
 			rows[i] = ListSelectedStyle.Render(row)
-		} else if i == l.cursor {
+		} else if absIdx == l.cursor {
 			rows[i] = ListSelectedStyle.UnsetBackground().Render(row)
 		} else {
 			rows[i] = ListItemStyle.Render(row)
@@ -128,7 +179,12 @@ func (l ListView) View() string {
 	}
 
 	content := lipgloss.JoinVertical(lipgloss.Left, append([]string{header}, rows...)...)
-	return baseStyle.Render(content)
+	scrollbar := renderScrollbar(scrollOffset, total, visible)
+
+	return lipgloss.JoinHorizontal(lipgloss.Top,
+		baseStyle.Render(content),
+		scrollbar,
+	)
 }
 
 func renderListRow(badge, name, detail, updated string) string {

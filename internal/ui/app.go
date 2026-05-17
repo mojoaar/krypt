@@ -1097,14 +1097,10 @@ func (a App) buildHelpContent(w int) string {
 	if a.store != nil {
 		lines = append(lines, note("Data    ")+key(a.store.Path()))
 	}
+	lines = append(lines, note("Author  ")+key("Morten Johansen")+HelpSepStyle.Render("  |  ")+key("johansen.foo"))
+	lines = append(lines, note("Repo    ")+key("github.com/mojoaar/krypt"))
 
 	return strings.Join(lines, "\n")
-}
-
-func (a App) helpFooter() string {
-	author := HelpDescStyle.Render("Author  ") + HelpKeyStyle.Render("Morten Johansen") + HelpSepStyle.Render("  |  ") + hyperlink("https://johansen.foo", "johansen.foo")
-	repo := HelpDescStyle.Render("Repo    ") + hyperlink("https://github.com/mojoaar/krypt", "github.com/mojoaar/krypt")
-	return author + "\n" + repo
 }
 
 func (a App) viewHelp() string {
@@ -1118,15 +1114,11 @@ func (a App) viewHelp() string {
 		scrollbar,
 	)
 
-	sep := HelpSepStyle.Render(strings.Repeat("─", helpVPWidth(a.width)-1))
-	_ = sep
-	footer := a.helpFooter()
-
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(colorPrimary).
 		Padding(1, 3).
-		Render(lipgloss.JoinVertical(lipgloss.Left, vpRendered, footer))
+		Render(vpRendered)
 
 	hint := HelpDescStyle.Render("j/k scroll  •  esc close")
 	content := lipgloss.JoinVertical(lipgloss.Left, box, hint)

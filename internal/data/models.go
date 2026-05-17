@@ -43,18 +43,19 @@ func EntryTypeLabel(t EntryType) string {
 }
 
 // EntryTypeBadge returns the readable label shown in the list TYPE column.
+// All labels are 5 characters wide and center-padded so columns align.
 func EntryTypeBadge(t EntryType) string {
 	switch t {
 	case EntryTypeLogin:
 		return "Login"
 	case EntryTypeNote:
-		return "Note"
+		return " Note"
 	case EntryTypeCard:
-		return "Card"
+		return " Card"
 	case EntryTypeIdentity:
 		return "Ident"
 	case EntryTypeSSHKey:
-		return "SSH"
+		return " SSH "
 	}
 	return "?????"
 }

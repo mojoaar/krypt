@@ -216,7 +216,7 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 | `a` | add new entry (type picker) |
 | `e` | edit selected |
 | `d` | delete selected |
-| `f` | toggle favorite (★) on selected entry |
+| `f` | toggle favorite on selected entry |
 
 ### Copy (list or detail view)
 | Key | Action |

@@ -997,7 +997,7 @@ func (a App) buildHelpContent(w int) string {
 			{"a", "add new entry"},
 			{"e", "edit selected"},
 			{"d", "delete selected"},
-			{"f", "toggle favorite (★) on selected entry"},
+			{"f", "toggle favorite on selected entry"},
 			{"/", "search by name, detail or tag"},
 		}},
 		{"Copy (in list or detail)", [][2]string{

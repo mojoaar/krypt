@@ -64,9 +64,9 @@ func (s *Sidebar) Rebuild(entries []data.Entry, showCounts bool) {
 			favCount++
 		}
 	}
-	favLabel := "  ★ Favorites"
+	favLabel := "  Favorites"
 	if showCounts {
-		favLabel = fmt.Sprintf("  ★ Favorites [%d]", favCount)
+		favLabel = fmt.Sprintf("  Favorites [%d]", favCount)
 	}
 	items := []sidebarItem{
 		{section: sectionAll, label: allLabel},

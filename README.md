@@ -191,11 +191,11 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 
 | Type | Fields |
 |------|--------|
-| **Login** | Name, Username, Password (masked), URL (clickable hyperlink), Notes, Tags |
-| **Note** | Name, Content, Tags |
-| **Card** | Name, Cardholder, Number (masked), Expiry, CVC (masked), PIN (masked), Notes (multiline), Tags |
-| **Identity** | Name, First/Last Name, Email, Phone, Address, Company, SSN (masked), Drivers License (masked), Passport Number (masked), Notes (optional secure), Tags |
-| **SSH Key** | Name, Public Key, Private Key (multiline, masked by default), Passphrase (masked), Host, Tags |
+| **Login** | Name, Username, Password (masked), URL (clickable hyperlink), Notes, Tags, Favorite |
+| **Note** | Name, Content, Tags, Favorite |
+| **Card** | Name, Cardholder, Number (masked), Expiry, CVC (masked), PIN (masked), Notes (multiline), Tags, Favorite |
+| **Identity** | Name, First/Last Name, Email, Phone, Address, Company, SSN (masked), Drivers License (masked), Passport Number (masked), Notes (optional secure), Tags, Favorite |
+| **SSH Key** | Name, Public Key, Private Key (multiline, masked by default), Passphrase (masked), Host, Tags, Favorite |
 
 ---
 
@@ -216,6 +216,7 @@ Or add `"token"` and `"sync_enabled": true` to `~/.config/krypt/config.json`.
 | `a` | add new entry (type picker) |
 | `e` | edit selected |
 | `d` | delete selected |
+| `f` | toggle favorite (★) on selected entry |
 
 ### Copy (list or detail view)
 | Key | Action |

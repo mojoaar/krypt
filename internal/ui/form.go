@@ -122,6 +122,7 @@ type Form struct {
 	width               int
 	height              int
 	pwGenCfg            data.PasswordGenConfig
+	favorite            bool // shared across all entry types
 }
 
 func NewForm() Form { return Form{} }
@@ -132,6 +133,7 @@ func (f *Form) OpenNew() {
 	f.pickerIdx = 0
 	f.editID = ""
 	f.scrollOffset = 0
+	f.favorite = false
 }
 
 // OpenEdit pre-fills the form from an existing entry.
@@ -190,6 +192,7 @@ func (f *Form) OpenEdit(e data.Entry) {
 
 	f.focus = 0
 	f.focusAt(0)
+	f.favorite = e.Favorite
 }
 
 func (f *Form) buildInputs() {
@@ -414,6 +417,11 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 				f.identityNotesSecure = !f.identityNotesSecure
 				return f, nil
 			}
+			// Favorite toggle
+			if !f.typePicker && f.focus == len(f.inputs) {
+				f.favorite = !f.favorite
+				return f, nil
+			}
 
 		case "ctrl+s", "enter":
 			if f.typePicker {
@@ -421,6 +429,15 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 				f.typePicker = false
 				f.buildInputs()
 				return f, textinput.Blink
+			}
+			// Favorite toggle field: enter toggles, ctrl+s submits
+			if !f.typePicker && f.focus == len(f.inputs) {
+				if msg.String() == "enter" {
+					f.favorite = !f.favorite
+					return f, nil
+				}
+				// ctrl+s falls through to submit
+				return f, func() tea.Msg { return FormSubmitMsg{Entry: f.buildEntry()} }
 			}
 			// On secure toggle field, enter also toggles
 			if f.entryType == data.EntryTypeNote && f.focus == int(fNoteSecure) && msg.String() == "enter" {
@@ -444,7 +461,7 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 			if f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPrivateKey) && f.sshPrivKeyRevealed && msg.String() == "enter" {
 				break
 			}
-			if msg.String() == "enter" && f.focus < len(f.inputs)-1 {
+			if msg.String() == "enter" && f.focus < len(f.inputs) {
 				f.focus++
 				f.focusAt(f.focus)
 				return f, textinput.Blink
@@ -459,6 +476,12 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 					f.pickerIdx--
 				}
 				return f, nil
+			}
+			// From favorite field, go back to last input
+			if !f.typePicker && f.focus == len(f.inputs) {
+				f.focus = len(f.inputs) - 1
+				f.focusAt(f.focus)
+				return f, textinput.Blink
 			}
 			// Don't let "up" steal from textareas
 			if f.entryType == data.EntryTypeNote && f.focus == int(fNoteContent) && msg.String() == "up" {
@@ -499,7 +522,7 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 			if f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPrivateKey) && f.sshPrivKeyRevealed && msg.String() == "down" {
 				break
 			}
-			if f.focus < len(f.inputs)-1 {
+			if f.focus < len(f.inputs) {
 				f.focus++
 				f.focusAt(f.focus)
 			}
@@ -507,7 +530,11 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 		}
 	}
 
-	if f.typePicker || f.focus >= len(f.inputs) {
+	if f.typePicker || f.focus > len(f.inputs) {
+		return f, nil
+	}
+	// Favorite toggle: don't forward to textinput
+	if !f.typePicker && f.focus == len(f.inputs) {
 		return f, nil
 	}
 	// Note secure toggle: don't forward to textinput
@@ -559,7 +586,7 @@ func (f Form) buildEntry() data.Entry {
 		return tags
 	}
 
-	e := data.Entry{ID: f.editID, Type: f.entryType}
+	e := data.Entry{ID: f.editID, Type: f.entryType, Favorite: f.favorite}
 	switch f.entryType {
 	case data.EntryTypeLogin:
 		e.Name = f.inputs[fLoginName].Value()
@@ -652,7 +679,12 @@ func (f Form) View() string {
 		hint += HelpDescStyle.Render("  ") +
 			HelpKeyStyle.Render("ctrl+r") + HelpDescStyle.Render(" "+revealLabel)
 	}
-	// Secure toggle hint
+	// Favorite toggle hint
+	if !f.typePicker && f.focus == len(f.inputs) {
+		hint += HelpDescStyle.Render("  ") +
+			HelpKeyStyle.Render("space/enter") + HelpDescStyle.Render(" toggle")
+	}
+	// Secure toggle hints
 	if !f.typePicker && f.entryType == data.EntryTypeNote && f.focus == int(fNoteSecure) {
 		hint += HelpDescStyle.Render("  ") +
 			HelpKeyStyle.Render("space/enter") + HelpDescStyle.Render(" toggle")
@@ -827,6 +859,23 @@ func (f Form) viewFields() string {
 			rows = append(rows, FormLabelStyle.Render(label))
 		}
 		rows = append(rows, renderedInput)
+	}
+
+	// Favorite toggle — always shown as the last field for all entry types
+	if end >= total {
+		favLabel := FormLabelStyle.Render("Favorite")
+		favCheck := "[ ] no"
+		if f.favorite {
+			favCheck = "[★] yes"
+		}
+		var favRendered string
+		if f.focus == len(f.inputs) {
+			favRendered = FormActiveInputStyle.Width(inputW).Render(favCheck)
+		} else {
+			favRendered = FormInputStyle.Width(inputW).Render(favCheck)
+		}
+		rows = append(rows, favLabel)
+		rows = append(rows, favRendered)
 	}
 
 	// "more below" indicator

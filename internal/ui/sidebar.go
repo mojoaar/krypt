@@ -15,6 +15,7 @@ type sidebarSection int
 
 const (
 	sectionAll         sidebarSection = iota
+	sectionFavorites                  // ★ Favorites filter
 	sectionTypesHeader                // non-selectable divider
 	sectionByType                     // one per EntryType
 	sectionTagsHeader                 // non-selectable divider
@@ -57,8 +58,19 @@ func (s *Sidebar) Rebuild(entries []data.Entry, showCounts bool) {
 	if showCounts {
 		allLabel = fmt.Sprintf("  All [%d]", len(entries))
 	}
+	favCount := 0
+	for _, e := range entries {
+		if e.Favorite {
+			favCount++
+		}
+	}
+	favLabel := "  ★ Favorites"
+	if showCounts {
+		favLabel = fmt.Sprintf("  ★ Favorites [%d]", favCount)
+	}
 	items := []sidebarItem{
 		{section: sectionAll, label: allLabel},
+		{section: sectionFavorites, label: favLabel},
 		{section: sectionTypesHeader, label: "  Types"},
 	}
 	for _, t := range data.AllEntryTypes {
@@ -146,21 +158,23 @@ func (s *Sidebar) MoveDown() {
 	}
 }
 
-// ActiveFilter returns the current type filter (empty = all) and tag filter.
-func (s *Sidebar) ActiveFilter() (typeFilter string, tagFilter string) {
+// ActiveFilter returns the current type filter, tag filter, and favorites-only flag.
+func (s *Sidebar) ActiveFilter() (typeFilter string, tagFilter string, favoritesOnly bool) {
 	if s.cursor >= len(s.items) {
-		return "", ""
+		return "", "", false
 	}
 	item := s.items[s.cursor]
 	switch item.section {
 	case sectionAll:
-		return "", ""
+		return "", "", false
+	case sectionFavorites:
+		return "", "", true
 	case sectionByType:
-		return item.filter, ""
+		return item.filter, "", false
 	case sectionByTag:
-		return "", item.filter
+		return "", item.filter, false
 	}
-	return "", ""
+	return "", "", false
 }
 
 func (s *Sidebar) View(height int) string {

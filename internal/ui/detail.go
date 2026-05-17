@@ -47,7 +47,11 @@ func (d *DetailView) TogglePrivKey()    { d.showPrivKey = !d.showPrivKey }
 func (d DetailView) View() string {
 	e := d.entry
 	badge := BadgeStyle(string(e.Type)).Render(data.EntryTypeBadge(e.Type))
-	title := DetailTitleStyle.Render(badge + "  " + e.Name)
+	name := e.Name
+	if e.Favorite {
+		name = lipgloss.NewStyle().Foreground(colorAccent).Render("★") + " " + e.Name
+	}
+	title := DetailTitleStyle.Render(badge + "  " + name)
 
 	var rows []string
 	rows = append(rows, title)

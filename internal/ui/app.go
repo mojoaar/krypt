@@ -519,6 +519,22 @@ func (a App) updateNav(msg tea.Msg) (tea.Model, tea.Cmd) {
 				a.setStatus("strong password generated and copied", false)
 			}
 			return a, clearStatusAfter(5 * time.Second)
+		case "f":
+			if e := a.list.Selected(); e != nil {
+				e.Favorite = !e.Favorite
+				a.store.Update(*e)
+				if err := a.store.Save(a.masterPassword); err != nil {
+					a.setStatus("save failed: "+err.Error(), true)
+				} else {
+					star := "removed from"
+					if e.Favorite {
+						star = "added to"
+					}
+					a.setStatus(e.Name+" "+star+" favorites", false)
+					a.rebuildList()
+				}
+				return a, clearStatusAfter(3 * time.Second)
+			}
 		case "x":
 			a.export.Open()
 			a.mode = modeExport
@@ -593,6 +609,22 @@ func (a App) updateDetail(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return a.handleCopyDetail("o")
 		case "i":
 			return a.handleCopyDetail("i")
+		case "f":
+			entry := a.detail.entry
+			entry.Favorite = !entry.Favorite
+			a.store.Update(entry)
+			if err := a.store.Save(a.masterPassword); err != nil {
+				a.setStatus("save failed: "+err.Error(), true)
+			} else {
+				star := "removed from"
+				if entry.Favorite {
+					star = "added to"
+				}
+				a.setStatus(entry.Name+" "+star+" favorites", false)
+				a.detail.entry = entry
+				a.rebuildList()
+			}
+			return a, clearStatusAfter(3 * time.Second)
 		}
 	}
 	return a, nil
@@ -719,8 +751,8 @@ func (a *App) rebuildList() {
 	}
 	entries := a.store.Entries()
 	a.sidebar.Rebuild(entries, a.syncCfg.EffectiveShowCounts())
-	typeF, tagF := a.sidebar.ActiveFilter()
-	filtered := FilterAndSort(entries, typeF, tagF, a.search.Value())
+	typeF, tagF, favOnly := a.sidebar.ActiveFilter()
+	filtered := FilterAndSort(entries, typeF, tagF, a.search.Value(), favOnly)
 	a.list.SetEntries(filtered)
 	a.list.SetFocused(a.focus == focusList)
 	a.sidebar.SetFocused(a.focus == focusSidebar)
@@ -871,6 +903,7 @@ func (a App) viewHelpBar() string {
 			{"a", "add"},
 			{"e", "edit"},
 			{"d", "delete"},
+			{"f", "favorite"},
 			{"enter", "open"},
 			{"/", "search"},
 			{"s", "sync"},
@@ -881,6 +914,7 @@ func (a App) viewHelpBar() string {
 			{"esc", "back"},
 			{"e", "edit"},
 			{"d", "delete"},
+			{"f", "favorite"},
 		}
 		switch a.detail.entry.Type {
 		case data.EntryTypeNote:
@@ -963,6 +997,7 @@ func (a App) buildHelpContent(w int) string {
 			{"a", "add new entry"},
 			{"e", "edit selected"},
 			{"d", "delete selected"},
+			{"f", "toggle favorite (★) on selected entry"},
 			{"/", "search by name, detail or tag"},
 		}},
 		{"Copy (in list or detail)", [][2]string{

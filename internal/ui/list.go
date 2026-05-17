@@ -145,6 +145,9 @@ func (l ListView) View() string {
 		absIdx := i + scrollOffset
 		badge := BadgeStyle(string(e.Type)).Render(data.EntryTypeBadge(e.Type))
 		name := truncate(e.Name, nameW)
+		if e.Favorite {
+			name = lipgloss.NewStyle().Foreground(colorAccent).Render("★") + " " + truncate(e.Name, nameW-2)
+		}
 		detail := truncate(e.DetailLine(), detailW)
 		updated := e.UpdatedAt.Format("Jan 02 2006")
 		if e.UpdatedAt.IsZero() {
@@ -222,11 +225,14 @@ func max(a, b int) int {
 	return b
 }
 
-// FilterAndSort returns entries filtered by type/tag/search and sorted by name.
-func FilterAndSort(entries []data.Entry, typeFilter, tagFilter, search string) []data.Entry {
+// FilterAndSort returns entries filtered by type/tag/favorites/search and sorted by name.
+func FilterAndSort(entries []data.Entry, typeFilter, tagFilter, search string, favoritesOnly bool) []data.Entry {
 	search = strings.ToLower(strings.TrimSpace(search))
 	out := make([]data.Entry, 0, len(entries))
 	for _, e := range entries {
+		if favoritesOnly && !e.Favorite {
+			continue
+		}
 		if typeFilter != "" && string(e.Type) != typeFilter {
 			continue
 		}

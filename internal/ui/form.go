@@ -12,11 +12,10 @@ import (
 	"github.com/mojoaar/krypt/internal/data"
 )
 
-// generatePassword returns a cryptographically random 30-character password
-// using uppercase, lowercase, digits, and safe symbols.
-func generatePassword() string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*-_+=?"
-	const length = 30
+// generatePassword returns a cryptographically random password using the given config.
+func generatePassword(cfg data.PasswordGenConfig) string {
+	charset := cfg.Charset()
+	length := cfg.EffectiveLength()
 	b := make([]byte, length)
 	for i := range b {
 		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
@@ -122,6 +121,7 @@ type Form struct {
 	editID              string // non-empty when editing an existing entry
 	width               int
 	height              int
+	pwGenCfg            data.PasswordGenConfig
 }
 
 func NewForm() Form { return Form{} }
@@ -389,11 +389,11 @@ func (f Form) Update(msg tea.Msg) (Form, tea.Cmd) {
 			return f, nil
 
 		case "ctrl+g":
-			// Generate a strong 30-char password for Login password or SSH passphrase.
+			// Generate a password for Login password or SSH passphrase.
 			isLoginPw := f.entryType == data.EntryTypeLogin && f.focus == int(fLoginPassword)
 			isSSHPass := f.entryType == data.EntryTypeSSHKey && f.focus == int(fSSHPassphrase)
 			if !f.typePicker && (isLoginPw || isSSHPass) {
-				pw := generatePassword()
+				pw := generatePassword(f.pwGenCfg)
 				f.inputs[f.focus].SetValue(pw)
 				// Reveal so user can see the generated password.
 				f.showMasked[f.focus] = true

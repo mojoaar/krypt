@@ -87,9 +87,41 @@ Files:
 |------|-------------|
 | `vault.enc` | AES-256-GCM encrypted vault |
 | `2fa.enc` | Encrypted TOTP secret (only present if 2FA is enabled) |
-| `config.json` | Sync settings (unencrypted) |
+| `config.json` | Sync + generator settings (unencrypted) |
 | `attempts.json` | Failed unlock counter — HMAC-signed; editing it triggers lockout |
 | `.vault-secret` | Per-install HMAC signing key (mode `0600`) |
+
+### config.json reference
+
+`~/.config/krypt/config.json` is created automatically. All fields are optional — omit any to use the default.
+
+```json
+{
+  "sync_enabled": false,
+  "gist_id": "",
+  "token": "",
+  "password_gen": {
+    "length": 30,
+    "uppercase": true,
+    "lowercase": true,
+    "digits": true,
+    "symbols": true,
+    "symbol_set": "!@#$%^&*-_+=?"
+  }
+}
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `sync_enabled` | `false` | Enable GitHub Gist sync |
+| `gist_id` | `""` | Saved automatically after first push |
+| `token` | `""` | GitHub token fallback (prefer `KRYPT_GITHUB_TOKEN` env var) |
+| `password_gen.length` | `30` | Generated password length |
+| `password_gen.uppercase` | `true` | Include A–Z |
+| `password_gen.lowercase` | `true` | Include a–z |
+| `password_gen.digits` | `true` | Include 0–9 |
+| `password_gen.symbols` | `true` | Include symbols |
+| `password_gen.symbol_set` | `!@#$%^&*-_+=?` | Which symbols to use |
 
 ---
 
@@ -350,6 +382,16 @@ make build
 ---
 
 ## Changelog
+
+### v1.4.3
+
+**Configurable password generator**
+- Password generator settings are now configurable in `~/.config/krypt/config.json` under `password_gen`
+- Configurable fields: `length`, `uppercase`, `lowercase`, `digits`, `symbols`, `symbol_set`
+- Defaults remain the same (30 chars, all character classes, `!@#$%^&*-_+=?` symbols)
+- Generator used for both `ctrl+g` in forms and the `g` global keybinding
+
+---
 
 ### v1.4.2
 

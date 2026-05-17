@@ -107,6 +107,9 @@ func NewApp(version string) App {
 		syncCfg = &data.Config{}
 	}
 
+	f := NewForm()
+	f.pwGenCfg = syncCfg.PasswordGen
+
 	return App{
 		version: version,
 		mode:    modeUnlock,
@@ -114,7 +117,7 @@ func NewApp(version string) App {
 		sidebar: sb,
 		list:    lv,
 		detail:  dv,
-		form:    NewForm(),
+		form:    f,
 		confirm: NewConfirm(),
 		export:  NewExportModel(),
 		search:  si,
@@ -391,7 +394,7 @@ func (a App) updateMenu(msg tea.Msg) (tea.Model, tea.Cmd) {
 		a.mode = modeNav
 	case "g":
 		a.mode = modeNav
-		pw := generatePassword()
+		pw := generatePassword(a.syncCfg.PasswordGen)
 		if err := clipboard.WriteAll(pw); err != nil {
 			a.setStatus("generate failed: "+err.Error(), true)
 		} else {
@@ -509,7 +512,7 @@ func (a App) updateNav(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "t":
 			return a.open2FASetup()
 		case "g":
-			pw := generatePassword()
+			pw := generatePassword(a.syncCfg.PasswordGen)
 			if err := clipboard.WriteAll(pw); err != nil {
 				a.setStatus("generate failed: "+err.Error(), true)
 			} else {

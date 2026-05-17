@@ -968,12 +968,13 @@ func (a App) buildHelpContent(w int) string {
 			{"p", "copy password / private key"},
 			{"n", "copy card number"},
 			{"x", "copy card expiry"},
+			{"i", "copy card PIN"},
 			{"k", "copy SSH public key"},
 			{"s", "copy SSN (identity)"},
 			{"l", "copy drivers license (identity)"},
 			{"b", "copy passport number (identity)"},
 			{"o", "copy identity notes"},
-			{"space", "reveal card number + cvc / password / SSH private key / identity sensitive fields"},
+			{"space", "reveal card number + cvc + pin / password / SSH private key / identity sensitive fields"},
 		}},
 		{"Login URLs", [][2]string{
 			{"", "URLs are shown as clickable hyperlinks"},
@@ -1059,6 +1060,30 @@ func (a App) buildHelpContent(w int) string {
 	lines = append(lines, "")
 	lines = append(lines, note("On next launch after enabling, krypt will prompt:"))
 	lines = append(lines, note("  master password → 6-digit code from your app → vault opens."))
+	lines = append(lines, "")
+	lines = append(lines, sep)
+	lines = append(lines, "")
+
+	// ── CLI ──────────────────────────────────────────────────────────────────
+	lines = append(lines, head("CLI  (no TUI required)"))
+	lines = append(lines, note("Retrieve secrets from scripts or the shell without opening the TUI."))
+	lines = append(lines, note("2FA is not required for CLI — master password only."))
+	lines = append(lines, "")
+	lines = append(lines, note("  ")+key("krypt get <name> <field>")+note("         print secret to stdout"))
+	lines = append(lines, note("  ")+key("krypt get <name> <field> --copy")+note("  copy secret to clipboard"))
+	lines = append(lines, note("  ")+key("krypt list")+note("                       list all entries"))
+	lines = append(lines, note("  ")+key("krypt list --type=login")+note("           filter by type"))
+	lines = append(lines, note("  ")+key("krypt help")+note("                       show CLI field reference"))
+	lines = append(lines, "")
+	lines = append(lines, note("Master password via env var or secure prompt:"))
+	lines = append(lines, note("  ")+key("export KRYPT_MASTER_PASSWORD=..."))
+	lines = append(lines, "")
+	lines = append(lines, note("Field names by type:"))
+	lines = append(lines, note("  login    ")+key("password  username  url  notes"))
+	lines = append(lines, note("  note     ")+key("content"))
+	lines = append(lines, note("  card     ")+key("number  expiry  cvc  pin  holder  bank  notes"))
+	lines = append(lines, note("  identity ")+key("email  phone  ssn  license  passport  firstname  lastname"))
+	lines = append(lines, note("  ssh      ")+key("pubkey  privkey  passphrase  host"))
 	lines = append(lines, "")
 	lines = append(lines, sep)
 	lines = append(lines, "")

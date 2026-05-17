@@ -211,7 +211,7 @@ func printUsage(version string) {
 	authorLink := "\033]8;;https://johansen.foo\033\\johansen.foo\033]8;;\033\\"
 	repoLink := "\033]8;;https://github.com/mojoaar/krypt\033\\github.com/mojoaar/krypt\033]8;;\033\\"
 	fmt.Printf(`krypt %s — terminal password manager
-Author : Morten Johansen  %s
+Author : Morten Johansen  |  %s
 Repo   : %s
 
 Usage:

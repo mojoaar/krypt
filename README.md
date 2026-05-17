@@ -351,6 +351,16 @@ make build
 
 ## Changelog
 
+### v1.4.2
+
+**Help overlay**
+- `johansen.foo` and `github.com/mojoaar/krypt` are now clickable OSC 8 terminal hyperlinks (cmd+click in iTerm2 / WezTerm / kitty / Ghostty; falls back to plain text elsewhere)
+- Added CLI section: `krypt get`, `krypt list`, `krypt help` usage + full field reference per entry type
+- Added missing `i` copy card PIN to the copy keybindings reference
+- Updated `space` reveal description to include PIN
+
+---
+
 ### v1.4.1
 
 **Bug fix — panel overflow**

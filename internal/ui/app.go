@@ -1094,13 +1094,14 @@ func (a App) viewHelp() string {
 	)
 
 	sep := HelpSepStyle.Render(strings.Repeat("─", helpVPWidth(a.width)-1))
+	_ = sep
 	footer := a.helpFooter()
 
 	box := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(colorPrimary).
 		Padding(1, 3).
-		Render(lipgloss.JoinVertical(lipgloss.Left, vpRendered, sep, footer))
+		Render(lipgloss.JoinVertical(lipgloss.Left, vpRendered, footer))
 
 	hint := HelpDescStyle.Render("j/k scroll  •  esc close")
 	content := lipgloss.JoinVertical(lipgloss.Left, box, hint)

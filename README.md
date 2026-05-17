@@ -386,6 +386,20 @@ make build
 
 ## Changelog
 
+### v1.4.5
+
+**Favorites**
+- Added `Favorites` section to the sidebar (below All) — filters the list to favorited entries only
+- Favorite toggle (`f`) available in list and detail views for quick marking
+- Favorite checkbox in add/edit forms for all entry types
+- Sidebar shows count: `Favorites [N]`
+
+**Polish**
+- Removed star symbol (★) from all views — sidebar `Favorites [N]` is the sole indicator
+- Configurable sidebar counts now also apply to the Favorites section
+
+---
+
 ### v1.4.4
 
 **List view polish**

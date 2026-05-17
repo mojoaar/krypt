@@ -351,6 +351,15 @@ make build
 
 ## Changelog
 
+### v1.4.1
+
+**Bug fix — panel overflow**
+- List and sidebar now use virtual windowing: only visible rows are rendered, so the layout never overflows regardless of vault size
+- List panel shows a `│`/`┃` scrollbar on the right edge when entries exceed the visible height
+- Sidebar shows `▲ scroll` / `▼ more` indicators when items extend beyond the panel
+
+---
+
 ### v1.4.0
 
 **Card entry improvements**

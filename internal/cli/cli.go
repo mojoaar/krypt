@@ -208,9 +208,11 @@ func fieldHelp() string {
 }
 
 func printUsage(version string) {
+	authorLink := "\033]8;;https://johansen.foo\033\\johansen.foo\033]8;;\033\\"
+	repoLink := "\033]8;;https://github.com/mojoaar/krypt\033\\github.com/mojoaar/krypt\033]8;;\033\\"
 	fmt.Printf(`krypt %s — terminal password manager
-Author : Morten Johansen  <https://johansen.foo>
-Repo   : https://github.com/mojoaar/krypt
+Author : Morten Johansen  %s
+Repo   : %s
 
 Usage:
   krypt                              launch TUI
@@ -235,7 +237,7 @@ Examples:
   krypt get "iCloud" password --copy
   krypt get "GitHub SSH" pubkey
   KRYPT_MASTER_PASSWORD=xxx krypt list --type=login
-`, version)
+`, version, authorLink, repoLink)
 }
 
 func fatalf(format string, args ...any) {

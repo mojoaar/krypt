@@ -42,22 +42,22 @@ func EntryTypeLabel(t EntryType) string {
 	return string(t)
 }
 
-// EntryTypeBadge returns the readable label shown in the list TYPE column.
-// All labels are 5 characters wide and center-padded so columns align.
+// EntryTypeBadge returns the 3-character label shown in the list TYPE column.
+// All labels are exactly 3 characters so the column is always the same width.
 func EntryTypeBadge(t EntryType) string {
 	switch t {
 	case EntryTypeLogin:
-		return "Login"
+		return "Log"
 	case EntryTypeNote:
-		return " Note"
+		return "Not"
 	case EntryTypeCard:
-		return " Card"
+		return "Crd"
 	case EntryTypeIdentity:
-		return "Ident"
+		return "Idt"
 	case EntryTypeSSHKey:
-		return " SSH "
+		return "SSH"
 	}
-	return "?????"
+	return "???"
 }
 
 // Entry holds all data for a single vault item. Type-specific fields are

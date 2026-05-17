@@ -97,8 +97,8 @@ func (l ListView) View() string {
 	const noCursorPfx = "  "
 	usable := l.width - 4 - scrollbarW // Padding(1,2) → 4 chars horizontal
 
-	// Column widths: BADGE(7 visual) + cursor prefix(2) + NAME + DETAIL + UPDATED
-	badgeContentW := 5
+	// Column widths: BADGE(5 visual) + cursor prefix(2) + NAME + DETAIL + UPDATED
+	badgeContentW := 3
 	badgeVisualW := badgeContentW + 2 // +2 for Padding(0,1)
 	updatedW := 12
 	nameW := (usable - badgeVisualW - updatedW - 6 - 2) * 35 / 100

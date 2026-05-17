@@ -42,14 +42,25 @@ func NewSidebar() Sidebar {
 
 // Rebuild rebuilds the sidebar items from the current set of entries.
 func (s *Sidebar) Rebuild(entries []data.Entry) {
+	// Count per type and per tag
+	typeCounts := map[string]int{}
+	tagCounts := map[string]int{}
+	for _, e := range entries {
+		typeCounts[string(e.Type)]++
+		for _, tag := range e.Tags {
+			tagCounts[tag]++
+		}
+	}
+
 	items := []sidebarItem{
-		{section: sectionAll, label: "  All"},
+		{section: sectionAll, label: fmt.Sprintf("  All [%d]", len(entries))},
 		{section: sectionTypesHeader, label: "  Types"},
 	}
 	for _, t := range data.AllEntryTypes {
+		count := typeCounts[string(t)]
 		items = append(items, sidebarItem{
 			section: sectionByType,
-			label:   "  " + data.EntryTypeLabel(t),
+			label:   fmt.Sprintf("  %s [%d]", data.EntryTypeLabel(t), count),
 			filter:  string(t),
 		})
 	}
@@ -69,7 +80,11 @@ func (s *Sidebar) Rebuild(entries []data.Entry) {
 		}
 		sort.Strings(tags)
 		for _, t := range tags {
-			items = append(items, sidebarItem{section: sectionByTag, label: "  #" + t, filter: t})
+			items = append(items, sidebarItem{
+				section: sectionByTag,
+				label:   fmt.Sprintf("  #%s [%d]", t, tagCounts[t]),
+				filter:  t,
+			})
 		}
 	}
 
